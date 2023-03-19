@@ -7,7 +7,7 @@ use crate::{
 use futures::future::join_all;
 use lazy_static::lazy_static;
 use parking_lot::RwLock;
-use std::{collections::HashSet, hash::Hasher, sync::Arc, time::Duration};
+use std::{hash::Hasher, sync::Arc, time::Duration};
 lazy_static! {
     pub static ref CACHED_NW_REQ: RwLock<Vec<Option<SLResponse>>> = RwLock::new(Vec::new());
 }

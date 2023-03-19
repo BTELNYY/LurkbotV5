@@ -1,16 +1,13 @@
 use std::sync::Arc;
 
-use crate::db::{ManagedDB, DB};
+use crate::db::ManagedDB;
 use rocket::{
     get,
-    http::Status,
     response::{
-        status::{Custom, NotFound},
-        Responder,
+        status::{NotFound},
     },
     routes,
     serde::json::Json,
-    tokio::task::JoinHandle,
     Route, State,
 };
 use serde::Serialize;

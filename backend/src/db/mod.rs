@@ -6,8 +6,7 @@ use async_trait::async_trait;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    postgres::{types::PgInterval, PgHasArrayType},
-    FromRow,
+    postgres::{types::PgInterval},
 };
 
 pub fn wrap_to_u64(x: i64) -> u64 {
