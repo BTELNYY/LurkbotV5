@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33403.182
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LurkbotV5", "LurkbotV5.csproj", "{8CD4AC49-040B-473F-A92E-CD587672C077}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "btelnyy.ConfigLoader.API", "..\..\..\btelnyy-ConfigLoader\btelnyy-ConfigLoader.API\btelnyy.ConfigLoader.API.csproj", "{DFED241E-F552-461B-A1BF-8D1BCE21A7AB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8CD4AC49-040B-473F-A92E-CD587672C077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CD4AC49-040B-473F-A92E-CD587672C077}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CD4AC49-040B-473F-A92E-CD587672C077}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CD4AC49-040B-473F-A92E-CD587672C077}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFED241E-F552-461B-A1BF-8D1BCE21A7AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFED241E-F552-461B-A1BF-8D1BCE21A7AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFED241E-F552-461B-A1BF-8D1BCE21A7AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFED241E-F552-461B-A1BF-8D1BCE21A7AB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C0ED63CA-0ED9-4A81-8FCF-D589A5948A6B}
+	EndGlobalSection
+EndGlobal

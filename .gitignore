@@ -1,0 +1,3 @@
+#to stop upload of keys
+*.txt
+*.env
