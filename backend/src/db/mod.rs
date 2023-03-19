@@ -5,9 +5,7 @@ use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use sqlx::{
-    postgres::{types::PgInterval},
-};
+use sqlx::postgres::types::PgInterval;
 
 pub fn wrap_to_u64(x: i64) -> u64 {
     (x as u64).wrapping_add(u64::MAX / 2 + 1)

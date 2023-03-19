@@ -1,11 +1,9 @@
-
-
 use super::{DBPlayer, DbRow, DB};
 use crate::db::wrap_to_i64;
 use anyhow::anyhow;
 use async_trait::async_trait;
 
-use sqlx::postgres::{PgPoolOptions};
+use sqlx::postgres::PgPoolOptions;
 
 #[derive(Debug)]
 pub struct PostgresDB {

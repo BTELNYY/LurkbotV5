@@ -1,15 +1,7 @@
 use std::sync::Arc;
 
 use crate::db::ManagedDB;
-use rocket::{
-    get,
-    response::{
-        status::{NotFound},
-    },
-    routes,
-    serde::json::Json,
-    Route, State,
-};
+use rocket::{get, response::status::NotFound, routes, serde::json::Json, Route, State};
 use serde::Serialize;
 
 use crate::db::DBPlayer;
