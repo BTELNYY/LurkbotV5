@@ -7,5 +7,6 @@ namespace LurkbotV5
         public string Token { get; set; } = "token";
         public bool DisableNonSLCommands { get; set; } = false;
         public uint RefreshCooldown { get; set; } = 60;
+
     }
 }
