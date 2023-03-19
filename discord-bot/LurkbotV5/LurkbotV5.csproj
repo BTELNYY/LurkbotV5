@@ -11,8 +11,4 @@
     <PackageReference Include="Discord.Net" Version="3.9.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\btelnyy-ConfigLoader\btelnyy-ConfigLoader.API\btelnyy.ConfigLoader.API.csproj" />
-  </ItemGroup>
-
 </Project>

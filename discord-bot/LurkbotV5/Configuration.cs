@@ -4,17 +4,9 @@ namespace LurkbotV5
 {
     public class Configuration
     {
-        public Config Config { get; private set; }
-        public void LoadConfiguration(string filename)
-        {
+        public string Token { get; set; } = "token";
+        public bool DisableNonSLCommands { get; set; } = false;
+        public uint RefreshCooldown { get; set; } = 60;
 
-        }
-    }
-
-    public struct Config
-    {
-        public string Token { get; set; }
-        public string Key { get; set; }
-        
     }
 }
