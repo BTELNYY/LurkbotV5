@@ -14,3 +14,5 @@ serde = { version = "1.0.157", features = ["derive"] }
 serde_json = "1.0.94"
 parking_lot = "0.12.1"
 lazy_static = "1.4.0"
+chrono = { version = "0.4.24", features = ["serde"] }
+tokio-postgres = { version = "0.7.7", features = ["with-chrono-0_4"] }
