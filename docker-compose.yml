@@ -15,6 +15,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./config.txt:/app/config.txt
+      - bot_db:/app/statistics
     depends_on:
       backend:
         condition: service_healthy
@@ -36,4 +37,6 @@ services:
 
 volumes:
   db:
+    driver: local
+  bot_db:
     driver: local
