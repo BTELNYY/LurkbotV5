@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\btelnyy-ConfigLoader\btelnyy-ConfigLoader.API\btelnyy.ConfigLoader.API.csproj" />
+    <ProjectReference Include="..\btelnyy-ConfigLoader\btelnyy-ConfigLoader.API\btelnyy.ConfigLoader.API.csproj" />
   </ItemGroup>
 
 </Project>
