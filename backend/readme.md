@@ -39,8 +39,8 @@ this will automatically download and build all dependancies
    * (health) GET /health
    * (nw) GET /nw/
    * (nw_api_all) GET /nw/all (REQUIRES AUTH)
-   * (nw_api) GET /nw/<id> (REQUIRES AUTH)
+   * (nw_api) GET /nw/\<id\> (REQUIRES AUTH)
    * (nw_api_servers) GET /nw/servers (REQUIRES AUTH)
    * (index) GET /query/
-   * (query_by_id) GET /query/id/<id>
-   * (query_by_name) GET /query/last_nick/<last_nick>
+   * (query_by_id) GET /query/id/\<id\>
+   * (query_by_name) GET /query/last_nick/\<last_nick\>
