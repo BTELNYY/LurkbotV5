@@ -7,13 +7,25 @@ services:
     volumes:
       - ./config.txt:/app/config.txt
     entrypoint: /usr/local/bin/backend /app/config.txt
+    depends_on:
+      db:
+        condition: service_healthy
   bot:
     build: ./discord-bot
     restart: unless-stopped
     volumes:
       - ./config.txt:/app/config.txt
+    depends_on:
+      backend:
+        condition: service_healthy
   db:
     image: postgres:alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 5s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
     restart: unless-stopped
     environment:
       - POSTGRES_USER=lurky
