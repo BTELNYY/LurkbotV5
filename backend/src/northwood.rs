@@ -1,14 +1,14 @@
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct SLResponse {
     pub cooldown: u64,
     pub servers: Vec<SLServer>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct SLServer {
     #[serde(rename = "ID")]
@@ -18,11 +18,12 @@ pub struct SLServer {
     pub players_list: Vec<Player>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Player {
     #[serde(rename = "ID")]
     pub id: String,
+    #[serde(default)]
     pub nickname: String,
 }
 

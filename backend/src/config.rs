@@ -5,6 +5,8 @@ use std::{
     str::FromStr,
 };
 
+use crate::db;
+
 #[derive(Debug, Clone)]
 pub struct Config {
     data: HashMap<String, String>,
@@ -40,6 +42,13 @@ impl Config {
     pub fn validate(&self) -> Result<()> {
         if let None = self.get::<String>("auth_key") {
             return Err(anyhow!("No auth key present in config file!"));
+        }
+        if let None = self.get::<String>("db_type") {
+            return Err(anyhow!("No backend url present in config file!"));
+        } else {
+            if let Err(e) = db::create_db_from_config(self) {
+                return Err(e);
+            }
         }
         Ok(())
     }

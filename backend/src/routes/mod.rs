@@ -6,7 +6,7 @@ use crate::config::Config;
 
 pub mod basics;
 pub mod northwood;
-
+pub mod query;
 pub type ConfigArgument = State<Arc<Config>>;
 
 pub struct Authenticated;

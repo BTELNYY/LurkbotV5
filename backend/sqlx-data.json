@@ -1,0 +1,209 @@
+{
+  "db": "PostgreSQL",
+  "1b8b00813c9dec2e6459382250e346e0480eeefb3051aa87bf3ef51f2ac9cf50": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamptz",
+          "Timestamptz",
+          "Interval",
+          "Varchar",
+          "VarcharArray",
+          "Jsonb",
+          "Interval",
+          "Int8"
+        ]
+      }
+    },
+    "query": "insert into lurkies (id, first_seen, last_seen, play_time, last_nickname, nicknames, flags, time_online, login_amt) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+  },
+  "6c31e590cb32f8dbad0465c4fa3c8a6034a00285e91c81669cfc7f92d3d89909": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "first_seen",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "last_seen",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "play_time",
+          "ordinal": 3,
+          "type_info": "Interval"
+        },
+        {
+          "name": "last_nickname",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "nicknames",
+          "ordinal": 5,
+          "type_info": "VarcharArray"
+        },
+        {
+          "name": "flags",
+          "ordinal": 6,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "time_online",
+          "ordinal": 7,
+          "type_info": "Interval"
+        },
+        {
+          "name": "login_amt",
+          "ordinal": 8,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "select * from lurkies where last_nickname = $1"
+  },
+  "6e6e8d685920304df8a7983a797bf622053ceaf3f4d007c1bf7e9eb3c51d3dae": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamptz",
+          "Timestamptz",
+          "Interval",
+          "Varchar",
+          "VarcharArray",
+          "Jsonb",
+          "Interval",
+          "Int8"
+        ]
+      }
+    },
+    "query": "update lurkies set first_seen = $2, last_seen = $3, play_time = $4, last_nickname = $5, nicknames = $6, flags = $7, time_online = $8, login_amt = $9 where id = $1"
+  },
+  "ad8d1c573476ca62ae9fe3c7bcd7f287578c76546f6a24a4cfe9dca9b76f8d0c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "first_seen",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "last_seen",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "play_time",
+          "ordinal": 3,
+          "type_info": "Interval"
+        },
+        {
+          "name": "last_nickname",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "nicknames",
+          "ordinal": 5,
+          "type_info": "VarcharArray"
+        },
+        {
+          "name": "flags",
+          "ordinal": 6,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "time_online",
+          "ordinal": 7,
+          "type_info": "Interval"
+        },
+        {
+          "name": "login_amt",
+          "ordinal": 8,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "select * from lurkies where id = $1"
+  },
+  "b1a36d25d9633ed2ac04939fcb614ccb2b513243c148f18694592ae037f9d35f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "select"
+  },
+  "cff94a3f78e58ecc068dd7f3eacf77d8118d0ccc7ff2785d7f63d34653997fcd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "select id from lurkies where id = $1"
+  }
+}

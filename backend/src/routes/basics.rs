@@ -1,4 +1,10 @@
-use rocket::{get, http::Status, routes, tokio::task::JoinHandle, Route, State};
+use std::sync::Arc;
+
+use rocket::{
+    get, http::Status, response::status::Custom, routes, tokio::task::JoinHandle, Route, State,
+};
+
+use crate::db::ManagedDB;
 
 use super::Authenticated;
 
@@ -13,11 +19,15 @@ pub fn test_auth(_auth: Authenticated) -> &'static str {
 }
 
 #[get("/health")]
-pub fn health(g: &State<JoinHandle<()>>) -> Result<&'static str, Status> {
+pub async fn health(g: &State<JoinHandle<()>>, db: &State<Arc<ManagedDB>>) -> Custom<&'static str> {
     if g.is_finished() {
-        Err(Status::InternalServerError)
+        Custom(Status::InternalServerError, "Backend thread died!")
     } else {
-        Ok("OK")
+        if db.health().await.is_err() {
+            Custom(Status::InternalServerError, "DB is dead!")
+        } else {
+            Custom(Status::Ok, "OK")
+        }
     }
 }
 
