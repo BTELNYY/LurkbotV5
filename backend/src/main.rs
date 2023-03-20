@@ -3,6 +3,7 @@ use config::Config;
 use rocket::http::ContentType;
 use rocket::tokio::spawn;
 use rocket::{catch, catchers};
+mod query;
 mod backend;
 mod config;
 mod db;
