@@ -1,6 +1,8 @@
 use backend::backend;
 use config::Config;
+use rocket::http::ContentType;
 use rocket::tokio::spawn;
+use rocket::{catch, catchers};
 mod backend;
 mod config;
 mod db;
@@ -26,6 +28,21 @@ impl Args {
         Ok(())
     }
 }
+#[catch(default)]
+async fn default_error_catcher(
+    status: rocket::http::Status,
+    _: &rocket::Request<'_>,
+) -> (rocket::http::ContentType, (rocket::http::Status, Vec<u8>)) {
+    let http_cat = format!("https://http.cat/{}", status.code);
+    let e = reqwest::get(http_cat).await;
+    if let Ok(e) = e {
+        let bytes = e.bytes().await;
+        if let Ok(bytes) = bytes {
+            return (ContentType::JPEG, (status, bytes.to_vec()));
+        }
+    }
+    return (ContentType::Text, (status, Vec::new()));
+}
 
 #[rocket::main]
 async fn main() -> Result<(), anyhow::Error> {
@@ -45,6 +62,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let db = Arc::new(db);
     let backend_thread = spawn(backend(Arc::clone(&config), Arc::clone(&db)));
     let _rocket = rocket::build()
+        .register("/", catchers![default_error_catcher])
         .mount("/", routes::basics::routes())
         .mount("/nw", routes::northwood::routes())
         .mount("/query", routes::query::routes())
