@@ -1,6 +1,6 @@
 use std::fmt::Debug;
-pub mod postgres;
 pub mod mem;
+pub mod postgres;
 use crate::config::Config;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;

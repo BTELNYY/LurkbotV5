@@ -34,11 +34,7 @@ impl DB for MemoryDB {
         Ok(())
     }
     async fn has_player(&self, player_id: u64) -> Result<bool, anyhow::Error> {
-        Ok(self
-            .data
-            .read()
-            .iter()
-            .any(|player| player.id == player_id))
+        Ok(self.data.read().iter().any(|player| player.id == player_id))
     }
     async fn get_player(&self, player_id: u64) -> Result<DBPlayer, anyhow::Error> {
         self.data
