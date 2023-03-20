@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 pub mod postgres;
+pub mod mem;
 use crate::config::Config;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
@@ -111,6 +112,7 @@ pub fn create_db_from_config(config: &Config) -> Result<ManagedDB> {
     match config.get::<String>("db_type") {
         Some(db_type) => match db_type.as_str() {
             "postgres" => Ok(Box::new(postgres::PostgresDB::new(config)?)),
+            "memory" => Ok(Box::new(mem::MemoryDB::new())),
             _ => Err(anyhow!("Unknown DB type: {}", db_type)),
         },
         None => Err(anyhow!("No DB type present in config file!")),
