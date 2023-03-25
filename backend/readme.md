@@ -43,5 +43,16 @@ For the routes query_db and query_db_random, here are some examples
 * ?first_seen=>=2023-02-25T12:23:38-07:00 (first_seen greater than or this rfc 3339 date (it has to be rfc 3339))
 * ?first_seen=>=2023-01-25T12:23:38-07:00&last_seen=<2023-03-25T12:23:38-07:00 (first_seen greater than or this rfc 3339 date and last_seen less than this rfc 3339 date)
 
+The layout is \<op1\>\<val1\>,\<op2\>\<val2\>
+
+Valid ops are:
+* = (equal to)
+* \> (greater than)
+* < (less than)
+* \>= (greater than or equal to)
+* <= (less than or equal to)
+* != (not equal to)
+
+
 All query params are optional, and if they are not provided, they will not be used in the query.
 query_db_random will return a random player that matches the query params, and query_db will return at most 20 players that match the query params.
