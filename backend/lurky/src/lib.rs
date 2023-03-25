@@ -1,3 +1,3 @@
+pub mod config;
 pub mod db;
 pub mod query;
-pub mod config;

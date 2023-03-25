@@ -1,6 +1,4 @@
-
-
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::db::DBPlayer;
 
@@ -10,7 +8,7 @@ pub enum ConstraintOn {
     LastSeen,
     Playtime,
     TimeOnline,
-    LoginAmt
+    LoginAmt,
 }
 
 impl CompType {
@@ -20,7 +18,7 @@ impl CompType {
             Self::Greater => one > two,
             Self::GreaterEQ => one >= two,
             Self::Less => one < two,
-            Self::LessEQ => one <= two
+            Self::LessEQ => one <= two,
         }
     }
 }
@@ -31,7 +29,7 @@ pub enum CompType {
     GreaterEQ,
     Less,
     LessEQ,
-    Equal
+    Equal,
 }
 
 impl ToString for CompType {
@@ -41,7 +39,7 @@ impl ToString for CompType {
             Self::GreaterEQ => ">=".to_string(),
             Self::Less => "<".to_string(),
             Self::LessEQ => "<=".to_string(),
-            Self::Equal => "=".to_string()
+            Self::Equal => "=".to_string(),
         }
     }
 }
@@ -50,16 +48,16 @@ impl ToString for CompType {
 pub struct Constraint {
     pub on: ConstraintOn,
     pub value: String,
-    pub compare_type: CompType
+    pub compare_type: CompType,
 }
 
 impl Constraint {
     pub fn matches(&self, plr: &DBPlayer) -> Option<bool> {
-    match self.on {
+        match self.on {
             ConstraintOn::FirstSeen => {
                 let value: chrono::DateTime<chrono::Utc> = self.value.parse().ok()?;
                 Some(self.compare_type.comp(&plr.first_seen, &value))
-            },
+            }
             ConstraintOn::LastSeen => {
                 let value: chrono::DateTime<chrono::Utc> = self.value.parse().ok()?;
                 Some(self.compare_type.comp(&plr.last_seen, &value))
@@ -78,39 +76,52 @@ impl Constraint {
                 let value: u64 = self.value.parse().ok()?;
                 Some(self.compare_type.comp(&plr.login_amt, &value))
             }
-
         }
     }
     // probably works?
-    pub fn generate_postgres (&self) -> String {
+    pub fn generate_postgres(&self) -> String {
         match self.on {
             ConstraintOn::FirstSeen => {
                 let value: chrono::DateTime<chrono::Utc> = self.value.parse().unwrap();
-                format!("first_seen {} '{}'", self.compare_type.to_string(), value.format("%Y-%m-%d %H:%M:%S"))
-            },
+                format!(
+                    "first_seen {} '{}'",
+                    self.compare_type.to_string(),
+                    value.format("%Y-%m-%d %H:%M:%S")
+                )
+            }
             ConstraintOn::LastSeen => {
                 let value: chrono::DateTime<chrono::Utc> = self.value.parse().unwrap();
-                format!("last_seen {} '{}'", self.compare_type.to_string(), value.format("%Y-%m-%d %H:%M:%S"))
+                format!(
+                    "last_seen {} '{}'",
+                    self.compare_type.to_string(),
+                    value.format("%Y-%m-%d %H:%M:%S")
+                )
             }
             ConstraintOn::Playtime => {
                 let value: i64 = self.value.parse().unwrap();
                 let value = chrono::Duration::seconds(value);
-                format!("play_time {} '{}'", self.compare_type.to_string(), value.num_seconds())
+                format!(
+                    "play_time {} '{}'",
+                    self.compare_type.to_string(),
+                    value.num_seconds()
+                )
             }
             ConstraintOn::TimeOnline => {
                 let value: i64 = self.value.parse().unwrap();
                 let value = chrono::Duration::seconds(value);
-                format!("time_online {} '{}'", self.compare_type.to_string(), value.num_seconds())
+                format!(
+                    "time_online {} '{}'",
+                    self.compare_type.to_string(),
+                    value.num_seconds()
+                )
             }
             ConstraintOn::LoginAmt => {
                 let value: u64 = self.value.parse().unwrap();
                 format!("login_amt {} '{}'", self.compare_type.to_string(), value)
             }
-
         }
     }
 }
-
 
 /*trait ConstraintFilter {
     type Item;

@@ -1,11 +1,11 @@
-use lurky::config::Config;
-use lurky::db::{DBPlayer, ManagedDB};
 use crate::{
     northwood::SlServer,
     northwood::{Player, SLResponse},
 };
 use futures::future::join_all;
 use lazy_static::lazy_static;
+use lurky::config::Config;
+use lurky::db::{DBPlayer, ManagedDB};
 use parking_lot::RwLock;
 use std::{hash::Hasher, sync::Arc, time::Duration};
 lazy_static! {

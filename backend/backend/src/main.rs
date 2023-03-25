@@ -8,8 +8,8 @@ mod northwood;
 use std::path::PathBuf;
 use std::sync::Arc;
 mod routes;
-use lurky::db;
 use clap::Parser;
+use lurky::db;
 #[derive(Debug, Clone, Parser)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
