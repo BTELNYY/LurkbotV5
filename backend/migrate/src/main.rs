@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use clap::Parser;
-use indicatif::{ParallelProgressIterator, ProgressIterator};
+use indicatif::ParallelProgressIterator;
 use lurky::db;
 use lurky::{
     config::Config,
@@ -8,7 +8,6 @@ use lurky::{
 };
 use rayon::prelude::*;
 use serde::{Deserialize, Deserializer, Serialize};
-use serde_json::Value;
 use std::{
     collections::{HashMap, HashSet},
     fs,
@@ -179,9 +178,9 @@ async fn main() -> Result<(), anyhow::Error> {
         let read_files = migrator
             .iter()
             .map(|f| {
-                let mut file = fs::File::open(f)
+                let file = fs::File::open(f)
                     .expect(format!("Failed to open file {}", f.display()).as_str());
-                let mut buferr = std::io::BufReader::new(file);
+                let buferr = std::io::BufReader::new(file);
                 serde_json::from_reader(buferr)
                     .expect(format!("Failed to read file {}", f.display()).as_str())
             })

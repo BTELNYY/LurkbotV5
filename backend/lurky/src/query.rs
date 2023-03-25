@@ -1,191 +1,130 @@
-use serde::{Deserialize, Serialize};
+use chrono::Utc;
 
-use crate::db::DBPlayer;
+use crate::db::{wrap_to_i64, DBPlayer};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub enum ConstraintOn {
-    FirstSeen,
-    LastSeen,
-    Playtime,
-    TimeOnline,
-    LoginAmt,
+pub enum Operator {
+    LessThan,
+    GreaterThan,
+    EqualTo,
+    NotEqualTo,
+    LessThanEqualTo,
+    GreaterThanEqualTo,
 }
 
-impl CompType {
-    pub fn comp<T: Ord + Eq>(&self, one: &T, two: &T) -> bool {
-        match self {
-            Self::Equal => one == two,
-            Self::Greater => one > two,
-            Self::GreaterEQ => one >= two,
-            Self::Less => one < two,
-            Self::LessEQ => one <= two,
-        }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum CompType {
-    Greater,
-    GreaterEQ,
-    Less,
-    LessEQ,
-    Equal,
-}
-
-impl ToString for CompType {
+impl ToString for Operator {
     fn to_string(&self) -> String {
         match self {
-            Self::Greater => ">".to_string(),
-            Self::GreaterEQ => ">=".to_string(),
-            Self::Less => "<".to_string(),
-            Self::LessEQ => "<=".to_string(),
-            Self::Equal => "=".to_string(),
+            Operator::LessThan => "<".to_string(),
+            Operator::GreaterThan => ">".to_string(),
+            Operator::EqualTo => "=".to_string(),
+            Operator::NotEqualTo => "!=".to_string(),
+            Operator::LessThanEqualTo => "<=".to_string(),
+            Operator::GreaterThanEqualTo => ">=".to_string(),
         }
     }
 }
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Constraint {
-    pub on: ConstraintOn,
-    pub value: String,
-    pub compare_type: CompType,
+pub struct Query<T: Ord + Eq> {
+    pub operator: Operator,
+    pub val: T,
 }
 
-impl Constraint {
-    pub fn matches(&self, plr: &DBPlayer) -> Option<bool> {
-        match self.on {
-            ConstraintOn::FirstSeen => {
-                let value: chrono::DateTime<chrono::Utc> = self.value.parse().ok()?;
-                Some(self.compare_type.comp(&plr.first_seen, &value))
-            }
-            ConstraintOn::LastSeen => {
-                let value: chrono::DateTime<chrono::Utc> = self.value.parse().ok()?;
-                Some(self.compare_type.comp(&plr.last_seen, &value))
-            }
-            ConstraintOn::Playtime => {
-                let value: i64 = self.value.parse().ok()?;
-                let value = chrono::Duration::seconds(value);
-                Some(self.compare_type.comp(&plr.play_time, &value))
-            }
-            ConstraintOn::TimeOnline => {
-                let value: i64 = self.value.parse().ok()?;
-                let value = chrono::Duration::seconds(value);
-                Some(self.compare_type.comp(&plr.time_online, &value))
-            }
-            ConstraintOn::LoginAmt => {
-                let value: u64 = self.value.parse().ok()?;
-                Some(self.compare_type.comp(&plr.login_amt, &value))
-            }
+impl<T: Ord + Eq> Query<T> {
+    fn matches(&self, val: &T) -> bool {
+        match self.operator {
+            Operator::LessThan => val < &self.val,
+            Operator::GreaterThan => val > &self.val,
+            Operator::EqualTo => val == &self.val,
+            Operator::NotEqualTo => val != &self.val,
+            Operator::LessThanEqualTo => val <= &self.val,
+            Operator::GreaterThanEqualTo => val >= &self.val,
         }
     }
-    // probably works?
+}
+pub struct Restriction {
+    pub flags: Vec<i64>,
+    pub play_time: Vec<Query<chrono::Duration>>,
+    pub time_online: Vec<Query<chrono::Duration>>,
+    pub login_amt: Vec<Query<u64>>,
+    pub first_seen: Vec<Query<chrono::DateTime<Utc>>>,
+    pub last_seen: Vec<Query<chrono::DateTime<Utc>>>,
+}
+impl Restriction {
+    pub fn matches(&self, player: &DBPlayer) -> bool {
+        for flag in &self.flags {
+            if !player.flags.iter().any(|f| f.flag == *flag) {
+                return false;
+            }
+        }
+        for query in &self.play_time {
+            if !query.matches(&player.play_time) {
+                return false;
+            }
+        }
+        for query in &self.time_online {
+            if !query.matches(&player.time_online) {
+                return false;
+            }
+        }
+        for query in &self.login_amt {
+            if !query.matches(&player.login_amt) {
+                return false;
+            }
+        }
+        for query in &self.first_seen {
+            if !query.matches(&player.first_seen) {
+                return false;
+            }
+        }
+        for query in &self.last_seen {
+            if !query.matches(&player.last_seen) {
+                return false;
+            }
+        }
+        true
+    }
     pub fn generate_postgres(&self) -> String {
-        match self.on {
-            ConstraintOn::FirstSeen => {
-                let value: chrono::DateTime<chrono::Utc> = self.value.parse().unwrap();
-                format!(
-                    "first_seen {} '{}'",
-                    self.compare_type.to_string(),
-                    value.format("%Y-%m-%d %H:%M:%S")
-                )
-            }
-            ConstraintOn::LastSeen => {
-                let value: chrono::DateTime<chrono::Utc> = self.value.parse().unwrap();
-                format!(
-                    "last_seen {} '{}'",
-                    self.compare_type.to_string(),
-                    value.format("%Y-%m-%d %H:%M:%S")
-                )
-            }
-            ConstraintOn::Playtime => {
-                let value: i64 = self.value.parse().unwrap();
-                let value = chrono::Duration::seconds(value);
-                format!(
-                    "play_time {} '{}'",
-                    self.compare_type.to_string(),
-                    value.num_seconds()
-                )
-            }
-            ConstraintOn::TimeOnline => {
-                let value: i64 = self.value.parse().unwrap();
-                let value = chrono::Duration::seconds(value);
-                format!(
-                    "time_online {} '{}'",
-                    self.compare_type.to_string(),
-                    value.num_seconds()
-                )
-            }
-            ConstraintOn::LoginAmt => {
-                let value: u64 = self.value.parse().unwrap();
-                format!("login_amt {} '{}'", self.compare_type.to_string(), value)
-            }
-        }
+        //let mut query = String::new();
+        let mut queries = vec![];
+        queries.extend(
+            self.flags
+                .iter()
+                .map(|flag| format!("jsonb_path_query_array(flags, '$[*].flag') @> '{}'", flag)),
+        );
+        queries.extend(self.play_time.iter().map(|query| {
+            format!(
+                "play_time {} '{} seconds'::interval",
+                query.operator.to_string(),
+                query.val.num_seconds()
+            )
+        }));
+        queries.extend(self.time_online.iter().map(|query| {
+            format!(
+                "time_online {} '{} seconds'::interval",
+                query.operator.to_string(),
+                query.val.num_seconds()
+            )
+        }));
+        queries.extend(self.login_amt.iter().map(|query| {
+            format!(
+                "login_amt {} {}",
+                query.operator.to_string(),
+                wrap_to_i64(query.val)
+            )
+        }));
+        queries.extend(self.first_seen.iter().map(|query| {
+            format!(
+                "first_seen {} '{}'",
+                query.operator.to_string(),
+                query.val.to_rfc3339()
+            )
+        }));
+        queries.extend(self.last_seen.iter().map(|query| {
+            format!(
+                "last_seen {} '{}'",
+                query.operator.to_string(),
+                query.val.to_rfc3339()
+            )
+        }));
+        queries.join(" AND ")
     }
 }
-
-/*trait ConstraintFilter {
-    type Item;
-    fn filter_constraint(&self, constraint: Constraint<Item>) -> impl Iterator<Item = Item>;
-}*/
-/*
-pub trait ConstraintParsible where Self: Sized {
-    fn constraint_parse(dt: &str) -> Option<Self>;
-}
-
-/*impl<T: Ord + Eq + FromStr> ConstraintParsible for T {
-    fn constraint_parse(dt: &str) -> Option<Self> {
-        dt.parse().ok()
-    }
-}*/
-
-impl ConstraintParsible for chrono::Duration {
-    fn constraint_parse(dt: &str) -> Option<Self> {
-        let secs: i64 = dt.parse().ok()?;
-        Some(chrono::Duration::seconds(secs))
-    }
-}
-
-impl<T: Ord + Eq + ConstraintParsible> Constraint<T> {
-    pub fn parse_from(val: &str, on: ConstraintOn, comp_type: CompType) -> Option<Self> {
-        let val = T::constraint_parse(val)?;
-        Some(Constraint::new(val, on, comp_type))
-    }
-}
-
-impl<T: Ord + Eq + FromStr> Constraint<T> {
-
-}
-
-impl<T: Ord + Eq> Constraint<T> {
-    pub fn new(value: T, on: ConstraintOn, compare_type: CompType) -> Self {
-        Self {
-            value, on, compare_type
-        }
-    }
-    /*pub fn parse(on: ConstraintOn, stringy: String) -> Option<Self> {
-        match on {
-            ConstraintOn::FirstSeen => {
-                Some(Self::new(1234_u64, on, CompType::Equal))
-            }
-        }
-    }*/
-    pub fn valid_for(&self, val: &T) -> bool {
-        match self.compare_type {
-            CompType::Equal => *val == self.value,
-            CompType::Greater => *val > self.value,
-            CompType::GreaterEQ => *val >= self.value,
-            CompType::Less => *val < self.value,
-            CompType::LessEQ => *val <= self.value
-        }
-    }
-    pub fn all_match(constraints: &Vec<Constraint<T>>, value: &T) -> bool {
-        constraints.iter().all(|e| e.valid_for(value))
-    }
-    pub fn filter_constraint<'a>(&'a self, iter: impl Iterator<Item = T> + 'a) -> impl Iterator<Item = T> + '_ + 'a {
-        iter.filter(|e| self.valid_for(e))
-    }
-    pub fn filter_constraints<'a>(constraints: &'a Vec<Constraint<T>>, iter: impl Iterator<Item = T> + 'a) -> impl Iterator<Item = T> + '_ + 'a {
-        iter.filter(|e| Constraint::all_match(constraints, e))
-    }
-}
-*/

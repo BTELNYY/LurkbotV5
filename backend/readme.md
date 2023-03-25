@@ -28,3 +28,20 @@ this will automatically download and build all dependancies
    * (index) GET /query/
    * (query_by_id) GET /query/id/\<id\>
    * (query_by_name) GET /query/last_nick/\<last_nick\>
+   * (query_db) GET /query/db?<flags>&<login_amt>&<play_time>&<time_online>&<first_seen>&<last_seen> (REQUIRES AUTH)
+   * (query_db_random) GET /query/random?<flags>&<login_amt>&<play_time>&<time_online>&<first_seen>&<last_seen> (REQUIRES AUTH)
+
+# Querying
+For the routes query_db and query_db_random, here are some examples
+
+* ?login_amt=>100 (login_amt greater than 100)
+* ?login_amt=>100,<200 (login_amt greater than 100 and less than 200)
+* ?flags=1 (has a flag with id 1)
+* ?flags=1,2 (has a flags with id 1 and 2)
+* ?flags=1,2&login_amt=>100 (has a flags with id 1 and 2 and login_amt greater than 100)
+* ?play_time=>=3600 (play_time greater than or equal to 3600 in seconds)
+* ?first_seen=>=2023-02-25T12:23:38-07:00 (first_seen greater than or this rfc 3339 date (it has to be rfc 3339))
+* ?first_seen=>=2023-01-25T12:23:38-07:00&last_seen=<2023-03-25T12:23:38-07:00 (first_seen greater than or this rfc 3339 date and last_seen less than this rfc 3339 date)
+
+All query params are optional, and if they are not provided, they will not be used in the query.
+query_db_random will return a random player that matches the query params, and query_db will return at most 20 players that match the query params.

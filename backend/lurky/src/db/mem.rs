@@ -1,6 +1,8 @@
 use parking_lot::RwLock;
 
 use super::{DBPlayer, DB};
+use crate::query::Restriction;
+use rand::prelude::SliceRandom;
 #[derive(Debug)]
 pub struct MemoryDB {
     data: RwLock<Vec<DBPlayer>>,
@@ -64,5 +66,28 @@ impl DB for MemoryDB {
             .find(|player| player.last_nickname == nickname)
             .cloned()
             .ok_or_else(|| anyhow::anyhow!("Player not found"))
+    }
+    async fn get_by_restriction(
+        &self,
+        restriction: &Restriction,
+    ) -> Result<Vec<DBPlayer>, anyhow::Error> {
+        Ok(self
+            .data
+            .read()
+            .iter()
+            .filter(|player| restriction.matches(player))
+            .cloned()
+            .collect())
+    }
+    async fn get_by_restriction_random(
+        &self,
+        restriction: &Restriction,
+    ) -> Result<DBPlayer, anyhow::Error> {
+        let players = self.get_by_restriction(restriction).await?;
+        let mut rng = rand::thread_rng();
+        Ok(players
+            .choose(&mut rng)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("No players found"))?)
     }
 }

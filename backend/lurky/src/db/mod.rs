@@ -1,12 +1,12 @@
 use std::fmt::Debug;
 pub mod mem;
 pub mod postgres;
-use crate::config::Config;
+use crate::{config::Config, query::Restriction};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::types::PgInterval;
+use sqlx::{postgres::types::PgInterval, FromRow};
 
 pub fn wrap_to_u64(x: i64) -> u64 {
     (x as u64).wrapping_add(u64::MAX / 2 + 1)
@@ -22,7 +22,7 @@ pub struct Flag {
     pub issued_at: chrono::DateTime<Utc>,
     pub comment: String,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, FromRow)]
 pub struct DbRow {
     pub id: i64,
     pub first_seen: chrono::DateTime<Utc>,
@@ -106,6 +106,14 @@ pub trait DB: Send + Sync + Debug {
     async fn create_player(&self, player: DBPlayer) -> Result<(), anyhow::Error>;
     async fn update_player(&self, player: DBPlayer) -> Result<(), anyhow::Error>;
     async fn get_by_latest_nickname(&self, nickname: &str) -> Result<DBPlayer, anyhow::Error>;
+    async fn get_by_restriction(
+        &self,
+        restriction: &Restriction,
+    ) -> Result<Vec<DBPlayer>, anyhow::Error>;
+    async fn get_by_restriction_random(
+        &self,
+        restriction: &Restriction,
+    ) -> Result<DBPlayer, anyhow::Error>;
 }
 
 pub fn create_db_from_config(config: &Config) -> Result<ManagedDB> {

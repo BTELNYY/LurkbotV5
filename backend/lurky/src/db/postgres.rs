@@ -1,9 +1,9 @@
 use super::{DBPlayer, DbRow, DB};
-use crate::db::wrap_to_i64;
+use crate::{db::wrap_to_i64, query::Restriction};
 use anyhow::anyhow;
 use async_trait::async_trait;
 
-use sqlx::postgres::PgPoolOptions;
+use sqlx::{postgres::PgPoolOptions, Postgres};
 
 #[derive(Debug)]
 pub struct PostgresDB {
@@ -103,6 +103,47 @@ impl DB for PostgresDB {
             .fetch_optional(db)
             .await?;
             return Ok(DBPlayer::from_row(result.unwrap()));
+        }
+        Err(anyhow!("Not connected to database!"))
+    }
+    async fn get_by_restriction(
+        &self,
+        restriction: &Restriction,
+    ) -> Result<Vec<DBPlayer>, anyhow::Error> {
+        let postgres_res = restriction.generate_postgres();
+        let whe = if postgres_res.len() > 0 {
+            format!("WHERE {}", postgres_res)
+        } else {
+            "".to_string()
+        };
+        let query = format!("SELECT * FROM lurkies {} LIMIT 20", whe);
+        if let Some(db) = &self.pool {
+            let result = sqlx::query_as::<Postgres, DbRow>(&query)
+                .fetch_all(db)
+                .await?;
+            return Ok(result
+                .into_iter()
+                .map(|row| DBPlayer::from_row(row))
+                .collect());
+        }
+        Err(anyhow!("Not connected to database!"))
+    }
+    async fn get_by_restriction_random(
+        &self,
+        restriction: &Restriction,
+    ) -> Result<DBPlayer, anyhow::Error> {
+        let postgres_res = restriction.generate_postgres();
+        let whe = if postgres_res.len() > 0 {
+            format!("WHERE {}", postgres_res)
+        } else {
+            "".to_string()
+        };
+        let query = format!("SELECT * FROM lurkies {} ORDER BY random() LIMIT 1", whe);
+        if let Some(db) = &self.pool {
+            let result = sqlx::query_as::<Postgres, DbRow>(&query)
+                .fetch_one(db)
+                .await?;
+            return Ok(DBPlayer::from_row(result));
         }
         Err(anyhow!("Not connected to database!"))
     }

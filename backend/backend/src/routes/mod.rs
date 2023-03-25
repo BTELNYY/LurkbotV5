@@ -1,5 +1,5 @@
 use rocket::request::{self, FromRequest, Outcome, Request};
-use rocket::State;
+//use rocket::State;
 use std::sync::Arc;
 
 use lurky::config::Config;
@@ -7,7 +7,7 @@ use lurky::config::Config;
 pub mod basics;
 pub mod northwood;
 pub mod query;
-pub type ConfigArgument = State<Arc<Config>>;
+//pub type ConfigArgument = State<Arc<Config>>;
 
 pub struct Authenticated;
 #[rocket::async_trait]
