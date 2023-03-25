@@ -19,21 +19,35 @@ namespace LurkbotV5
         
         public Dictionary<string, CommandBase> Commands { get; private set; } = new Dictionary<string, CommandBase>();
 
-        public DiscordManager(Bot bot, DiscordSocketClient client) 
+        public DiscordManager(DiscordSocketClient client) 
         {
-            Bot = bot;
             Client = client;
         }
 
-        private void EventInit()
+        public void EventInit()
         {
 
+        }
+
+        public void BuildInit()
+        {
+            
+        }
+
+        public void SetBot(Bot bot)
+        {
+            Bot = bot;
         }
 
         public void BuildCommand(CommandBase command)
         {
             DiscordSocketClient client = Client;
             SlashCommandBuilder scb = new();
+            if(Bot == null || Bot.Config == null)
+            {
+                Log.WriteFatal("Bot and Config are null!");
+                return;
+            }
             if (Bot.Config.DisableNonSLCommands && command.CommandType != CommandType.SL)
             {
                 return;

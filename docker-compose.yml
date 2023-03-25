@@ -16,6 +16,9 @@ services:
     volumes:
       - ./config.txt:/app/config.txt
       - bot_db:/app/statistics
+      - ./logs:/app/logs/
+    environment:
+      - RUNNING_IN_DOCKER=true
     depends_on:
       backend:
         condition: service_healthy
