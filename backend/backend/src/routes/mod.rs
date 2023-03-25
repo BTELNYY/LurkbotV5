@@ -2,7 +2,7 @@ use rocket::request::{self, FromRequest, Outcome, Request};
 use rocket::State;
 use std::sync::Arc;
 
-use crate::config::Config;
+use lurky::config::Config;
 
 pub mod basics;
 pub mod northwood;

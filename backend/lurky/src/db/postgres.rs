@@ -40,7 +40,9 @@ impl DB for PostgresDB {
             .max_connections(5)
             .connect(&self.db_url)
             .await?;
+        println!("Postgres: Starting migrations...");
         sqlx::migrate!("./migrations").run(&pool).await?;
+        println!("Postgres: Migrations complete!");
         self.pool = Some(pool);
         Ok(())
     }

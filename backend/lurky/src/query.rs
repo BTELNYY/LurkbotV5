@@ -9,7 +9,6 @@ pub enum ConstraintOn {
     FirstSeen,
     LastSeen,
     Playtime,
-    Flags,
     TimeOnline,
     LoginAmt
 }
@@ -34,6 +33,19 @@ pub enum CompType {
     LessEQ,
     Equal
 }
+
+impl ToString for CompType {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Greater => ">".to_string(),
+            Self::GreaterEQ => ">=".to_string(),
+            Self::Less => "<".to_string(),
+            Self::LessEQ => "<=".to_string(),
+            Self::Equal => "=".to_string()
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Constraint {
     pub on: ConstraintOn,
@@ -48,7 +60,53 @@ impl Constraint {
                 let value: chrono::DateTime<chrono::Utc> = self.value.parse().ok()?;
                 Some(self.compare_type.comp(&plr.first_seen, &value))
             },
-            _ => todo!()
+            ConstraintOn::LastSeen => {
+                let value: chrono::DateTime<chrono::Utc> = self.value.parse().ok()?;
+                Some(self.compare_type.comp(&plr.last_seen, &value))
+            }
+            ConstraintOn::Playtime => {
+                let value: i64 = self.value.parse().ok()?;
+                let value = chrono::Duration::seconds(value);
+                Some(self.compare_type.comp(&plr.play_time, &value))
+            }
+            ConstraintOn::TimeOnline => {
+                let value: i64 = self.value.parse().ok()?;
+                let value = chrono::Duration::seconds(value);
+                Some(self.compare_type.comp(&plr.time_online, &value))
+            }
+            ConstraintOn::LoginAmt => {
+                let value: u64 = self.value.parse().ok()?;
+                Some(self.compare_type.comp(&plr.login_amt, &value))
+            }
+
+        }
+    }
+    // probably works?
+    pub fn generate_postgres (&self) -> String {
+        match self.on {
+            ConstraintOn::FirstSeen => {
+                let value: chrono::DateTime<chrono::Utc> = self.value.parse().unwrap();
+                format!("first_seen {} '{}'", self.compare_type.to_string(), value.format("%Y-%m-%d %H:%M:%S"))
+            },
+            ConstraintOn::LastSeen => {
+                let value: chrono::DateTime<chrono::Utc> = self.value.parse().unwrap();
+                format!("last_seen {} '{}'", self.compare_type.to_string(), value.format("%Y-%m-%d %H:%M:%S"))
+            }
+            ConstraintOn::Playtime => {
+                let value: i64 = self.value.parse().unwrap();
+                let value = chrono::Duration::seconds(value);
+                format!("play_time {} '{}'", self.compare_type.to_string(), value.num_seconds())
+            }
+            ConstraintOn::TimeOnline => {
+                let value: i64 = self.value.parse().unwrap();
+                let value = chrono::Duration::seconds(value);
+                format!("time_online {} '{}'", self.compare_type.to_string(), value.num_seconds())
+            }
+            ConstraintOn::LoginAmt => {
+                let value: u64 = self.value.parse().unwrap();
+                format!("login_amt {} '{}'", self.compare_type.to_string(), value)
+            }
+
         }
     }
 }

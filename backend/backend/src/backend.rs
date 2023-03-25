@@ -1,6 +1,6 @@
+use lurky::config::Config;
+use lurky::db::{DBPlayer, ManagedDB};
 use crate::{
-    config::Config,
-    db::{DBPlayer, ManagedDB},
     northwood::SlServer,
     northwood::{Player, SLResponse},
 };

@@ -1,16 +1,14 @@
 use backend::backend;
-use config::Config;
+use lurky::config::Config;
 use rocket::http::ContentType;
 use rocket::tokio::spawn;
 use rocket::{catch, catchers};
-mod query;
 mod backend;
-mod config;
-mod db;
 mod northwood;
 use std::path::PathBuf;
 use std::sync::Arc;
 mod routes;
+use lurky::db;
 use clap::Parser;
 #[derive(Debug, Clone, Parser)]
 #[clap(author, version, about, long_about = None)]
