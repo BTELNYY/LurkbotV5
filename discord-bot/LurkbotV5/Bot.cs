@@ -44,36 +44,49 @@ namespace LurkbotV5
             }
         }
 
-        public void StartBot()
+        public async void StartBot()
         {
+            Log.WriteInfo("Starting Bot...");
             if (Client == null)
             {
-                Log.WriteFatal("DiscordSocketClient is null!");
+                Log.WriteError("DiscordSocketClient is null!");
                 return;
             }
+            Log.WriteDebug("Client isn't null.");
             if (Config == null)
             {
-                Log.WriteFatal("Config is null!");
+                Log.WriteError("Config is null!");
                 return;
             }
-            if(DiscordManager == null) 
+            Log.WriteDebug("Config isn't null.");
+            if (DiscordManager == null)
             {
-                Log.WriteFatal("DiscordManager is null!");
+                Log.WriteError("DiscordManager is null!");
                 return;
             }
-            
-            Client.LoginAsync(TokenType.Bot, Config.Token);
+            Log.WriteDebug("Manager isn't null.");
             Client.Log += LogEvent;
             Client.Ready += OnReady;
+            Log.WriteInfo("Logging Into Discord...");
+            Log.WriteDebug("Token: " + Config.Token);
+            await Client.LoginAsync(TokenType.Bot, Config.Token);
+            Log.WriteInfo("Starting.");
+            await Client.StartAsync();
+            Log.WriteInfo("Start complete, delaying task");
+            await Task.Delay(-1);
+        }
+
+        public async Task OnReady()
+        {
+            Log.WriteInfo("Ready!");
+            if (DiscordManager == null)
+            {
+                Log.WriteError("DiscordManager is null!");
+                return;
+            }
             DiscordManager.EventInit();
             DiscordManager.BuildInit();
             DiscordManager.RepeatTaskInit();
-            Client.StartAsync();
-        }
-
-        public Task OnReady()
-        {
-            return Task.CompletedTask;
         }
 
 

@@ -37,11 +37,13 @@ namespace LurkbotV5
 
         public void RepeatTaskInit()
         {
+            Log.WriteInfo("Starting Repeating Task");
             Task.Run(() => UpdateTask());
         }
 
         async Task UpdateTask()
         {
+            Log.WriteInfo("Updating Embeds");
             while (true)
             {
                 UpdateEmbed();

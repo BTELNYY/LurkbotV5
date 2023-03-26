@@ -15,8 +15,21 @@ namespace LurkbotV5
 
         public Configuration()
         {
-            ConfigData configData = ConfigManager.GetConfiguration("./config.txt");
+            ConfigData configData = new ConfigData();
+            btelnyy.ConfigLoader.API.InternalConfig.ShowLogsInConsole = true;
+            btelnyy.ConfigLoader.API.InternalConfig.EnableLogging = true;
+            btelnyy.ConfigLoader.API.InternalConfig.LogPath = @".\logs\";
+            if (Program.CustomConfigPath)
+            {
+                configData = ConfigManager.GetConfiguration(Program.CustomPath);
+            }
+            else
+            {
+                configData = ConfigManager.GetConfiguration("./config.txt");
+            }
             Token = configData.GetString("bot_key", "key");
+            Token = Token.Replace("\n", string.Empty);
+            Token = Token.Replace(" ", string.Empty);
             DisableNonSLCommands = configData.GetBool("disable_non_sl_commands", false);
             RefreshCooldown = configData.GetUInt("refresh_cooldown", 60);
             AuthKey = configData.GetString("auth_key", "key");
