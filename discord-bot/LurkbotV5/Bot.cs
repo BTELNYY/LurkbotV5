@@ -18,6 +18,32 @@ namespace LurkbotV5
             DiscordManager = discordManager;
         }
 
+        public Configuration GetConfig()
+        {
+            if(Config == null)
+            {
+                Log.WriteError("Config is null!");
+                return new Configuration();
+            }
+            else
+            {
+                return Config;
+            }
+        }
+
+        public DiscordSocketClient GetClient()
+        {
+            if(Client == null) 
+            {
+                Log.WriteFatal("Client is null!");
+                return new DiscordSocketClient();
+            }
+            else
+            {
+                return Client;
+            }
+        }
+
         public void StartBot()
         {
             if (Client == null)
@@ -41,6 +67,7 @@ namespace LurkbotV5
             Client.Ready += OnReady;
             DiscordManager.EventInit();
             DiscordManager.BuildInit();
+            DiscordManager.RepeatTaskInit();
             Client.StartAsync();
         }
 

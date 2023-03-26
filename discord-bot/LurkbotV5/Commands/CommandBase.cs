@@ -18,7 +18,7 @@ namespace LurkbotV5.Commands
         public virtual bool IsDefaultEnabled { get; private set; } = true;
         public virtual List<string> Aliases { get; private set; } = new();
         public virtual bool PrivateCommand { get; private set; } = false;
-        public virtual ulong PrivateServerID { get; private set; } = Config.guildId;
+        public virtual ulong PrivateServerID { get; private set; } = 0;
         public virtual CommandType CommandType { get; private set; } = CommandType.DISCORD;
         public virtual void Execute(SocketSlashCommand command)
         {

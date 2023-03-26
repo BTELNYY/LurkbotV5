@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.Net;
 using LurkbotV5.Commands;
 using System.Diagnostics.Metrics;
+using LurkbotV5.Managers;
 
 namespace LurkbotV5
 {
@@ -34,9 +35,118 @@ namespace LurkbotV5
             
         }
 
+        public void RepeatTaskInit()
+        {
+            Task.Run(() => UpdateTask());
+        }
+
+        async Task UpdateTask()
+        {
+            while (true)
+            {
+                UpdateEmbed();
+                Log.WriteInfo("Updated Embed, waiting " + GetBot().GetConfig().RefreshCooldown + "s");
+                await Task.Delay(1000 * (int)GetBot().GetConfig().RefreshCooldown);
+            }
+        }
+
+        async void UpdateEmbed()
+        {
+            Configuration config = GetBot().GetConfig();
+            ulong guildid = config.GuildID;
+            ulong channelid = config.UpdateChannelID;
+            NWAllResponse response = APIManager.GetServerStatus(GetBot().GetConfig().AuthKey);
+
+            if(response.count == 0)
+            {
+                Log.WriteError("Failed to fetch servers: server count is 0");
+                return;
+            }
+
+            foreach(Server s in response.value.Servers)
+            {
+                Log.WriteDebug("Creating embed");
+                string name = "";
+                if (GetBot().GetConfig().ServerNames.ContainsKey(s.ID.ToString()))
+                {
+                    name = GetBot().GetConfig().ServerNames[s.ID.ToString()];
+                }
+                else
+                {
+                    name = "[Missing Server Name]";
+                }
+                var embed = new EmbedBuilder
+                {
+                    Title = name
+                };
+                embed.WithDescription("Players currently online:\n```\n" + String.Join("\n", s.GetPlayerNames()) + "```")
+                    .WithCurrentTimestamp()
+                    .WithColor(Color.Green)
+                    .AddField("Players online", s.PlayersList.Length);
+                Log.WriteDebug("Embed created");
+                var channel = GetBot().GetClient().GetChannel(GetBot().GetConfig().UpdateChannelID) as ITextChannel;
+                if (channel == null)
+                {
+                    Log.WriteFatal("Channel not found! " + GetBot().GetConfig().UpdateChannelID);
+                    return;
+                }
+                Log.WriteDebug("Channel obtained");
+                var meses = await channel.GetMessagesAsync().FlattenAsync();
+                Log.WriteDebug("Messages obtained");
+                if (meses == null)
+                {
+                    Log.WriteWarning("No messages, cringe");
+                    await channel.SendMessageAsync(embed: embed.Build());
+                    return;
+                }
+                Log.WriteDebug("Searching for messages from bot");
+                var botMes = meses.Where((message => message.Author.Id == GetBot().GetClient().CurrentUser.Id));
+                Log.WriteDebug("Getting first bot message");
+                if (!botMes.Any())
+                {
+                    Log.WriteWarning("No messages, cringe");
+                    await channel.SendMessageAsync(embed: embed.Build());
+                    return;
+                }
+                var messagetoEdit = botMes.First();
+                Log.WriteDebug("Checking dat shit");
+                if (messagetoEdit == null)
+                {
+                    // create new message
+                    Log.WriteDebug("Create new message");
+                    await channel.SendMessageAsync(embed: embed.Build());
+                }
+                else
+                {
+                    // edit message
+                    Log.WriteDebug("Edit message");
+                    var mestoEdituser = messagetoEdit as IUserMessage;
+                    if (mestoEdituser == null)
+                    {
+                        Log.WriteFatal("not a IUserMessage");
+                        return;
+                    }
+                    await mestoEdituser.ModifyAsync(properties => { properties.Embed = embed.Build(); });
+                }
+            }
+        }
+
         public void SetBot(Bot bot)
         {
             Bot = bot;
+        }
+
+        public Bot GetBot()
+        {
+            if (Bot == null)
+            {
+                Log.WriteFatal("Bot is null!");
+                return new Bot(null, null, null);
+            }
+            else
+            {
+                return Bot;
+            }
         }
 
         public void BuildCommand(CommandBase command)

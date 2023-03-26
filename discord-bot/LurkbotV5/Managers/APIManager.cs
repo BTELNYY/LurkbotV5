@@ -52,7 +52,7 @@ namespace LurkbotV5.Managers
             }
         }
 
-        public static NWAllResponse? GetServerStatus(string token)
+        public static NWAllResponse GetServerStatus(string token)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace LurkbotV5.Managers
             catch (Exception ex)
             {
                 Log.WriteError(ex.ToString());
-                return null;
+                return new NWAllResponse();
             }
         }
     }
@@ -93,6 +93,16 @@ namespace LurkbotV5.Managers
         public int Port;
         public bool Online;
         public Player[] PlayersList;
+
+        public string[] GetPlayerNames()
+        {
+            string[] strings = { };
+            foreach(var player in PlayersList)
+            {
+                strings.Append(player.Nickname);
+            }
+            return strings;
+        }
     }
 
     public struct Player
