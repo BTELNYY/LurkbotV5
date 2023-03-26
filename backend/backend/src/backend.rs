@@ -79,7 +79,10 @@ async fn update_player(
         id.parse::<u64>().expect("Unable to parse id")
     };
     let nick = if !raw_id.ends_with("northwood") {
-        player.nickname.clone().expect("Non-northwood player has no nickname")
+        player
+            .nickname
+            .clone()
+            .expect("Non-northwood player has no nickname")
     } else {
         let mut nick_parts = player.id.split("@");
         nick_parts.next().expect("Invalid nickname").to_string()
