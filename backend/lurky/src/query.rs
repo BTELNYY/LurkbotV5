@@ -1,4 +1,4 @@
-use chrono::Utc;
+use time::format_description::well_known::Rfc3339;
 
 use crate::db::{wrap_to_i64, DBPlayer};
 
@@ -42,11 +42,11 @@ impl<T: Ord + Eq> Query<T> {
 }
 pub struct Restriction {
     pub flags: Vec<i64>,
-    pub play_time: Vec<Query<chrono::Duration>>,
-    pub time_online: Vec<Query<chrono::Duration>>,
+    pub play_time: Vec<Query<time::Duration>>,
+    pub time_online: Vec<Query<time::Duration>>,
     pub login_amt: Vec<Query<u64>>,
-    pub first_seen: Vec<Query<chrono::DateTime<Utc>>>,
-    pub last_seen: Vec<Query<chrono::DateTime<Utc>>>,
+    pub first_seen: Vec<Query<time::OffsetDateTime>>,
+    pub last_seen: Vec<Query<time::OffsetDateTime>>,
 }
 impl Restriction {
     pub fn matches(&self, player: &DBPlayer) -> bool {
@@ -92,16 +92,16 @@ impl Restriction {
         );
         queries.extend(self.play_time.iter().map(|query| {
             format!(
-                "play_time {} '{} seconds'::interval",
+                "play_time {} '{}'",
                 query.operator.to_string(),
-                query.val.num_seconds()
+                query.val.whole_seconds()
             )
         }));
         queries.extend(self.time_online.iter().map(|query| {
             format!(
-                "time_online {} '{} seconds'::interval",
+                "time_online {} '{}'",
                 query.operator.to_string(),
-                query.val.num_seconds()
+                query.val.whole_seconds()
             )
         }));
         queries.extend(self.login_amt.iter().map(|query| {
@@ -115,14 +115,14 @@ impl Restriction {
             format!(
                 "first_seen {} '{}'",
                 query.operator.to_string(),
-                query.val.to_rfc3339()
+                query.val.format(&Rfc3339).expect("Format date correctly")
             )
         }));
         queries.extend(self.last_seen.iter().map(|query| {
             format!(
                 "last_seen {} '{}'",
                 query.operator.to_string(),
-                query.val.to_rfc3339()
+                query.val.format(&Rfc3339).expect("Format date correctly")
             )
         }));
         queries.join(" AND ")

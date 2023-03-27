@@ -102,9 +102,13 @@ impl DB for PostgresDB {
             )
             .fetch_optional(db)
             .await?;
-            return Ok(DBPlayer::from_row(result.unwrap()));
+            match result {
+                Some(row) => Ok(DBPlayer::from_row(row)),
+                None => Err(anyhow!("Player not found!")),
+            }
+        } else {
+            Err(anyhow!("Not connected to database!"))
         }
-        Err(anyhow!("Not connected to database!"))
     }
     async fn get_by_restriction(
         &self,

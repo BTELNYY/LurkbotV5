@@ -14,9 +14,7 @@ serde = { version = "1.0.157", features = ["derive"] }
 serde_json = "1.0.94"
 parking_lot = "0.12.1"
 lazy_static = "1.4.0"
-chrono = { version = "0.4.24", features = ["serde"] }
+time = { version = "0.3.20", features = ["serde", "formatting", "parsing"] }
 async-trait = "0.1.67"
-sqlx = { version = "0.6.2", features = ["chrono", "postgres", "json", "runtime-tokio-rustls", "offline"] }
 futures = "0.3.27"
-serde_with = { version = "2.3.1", features = ["chrono_0_4"] }
 lurky = { path = "../lurky" }

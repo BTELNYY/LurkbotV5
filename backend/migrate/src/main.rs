@@ -1,4 +1,3 @@
-use chrono::{DateTime, Utc};
 use clap::Parser;
 use indicatif::ParallelProgressIterator;
 use lurky::db;
@@ -15,6 +14,8 @@ use std::{
     path::PathBuf,
     sync::Arc,
 };
+use time::format_description::well_known::Rfc3339;
+use time::OffsetDateTime;
 #[derive(Debug, Clone, Parser)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -46,15 +47,15 @@ impl Args {
 
 pub struct DBPlayer {
     pub id: u64,
-    pub first_seen: chrono::DateTime<Utc>,
-    pub last_seen: chrono::DateTime<Utc>,
+    pub first_seen: time::DateTime<Utc>,
+    pub last_seen: time::DateTime<Utc>,
     #[serde_as(as = "DurationSeconds<i64>")]
-    pub play_time: chrono::Duration,
+    pub play_time: time::Duration,
     pub last_nickname: String,
     pub nicknames: Vec<String>,
     pub flags: Vec<Flag>,
     #[serde_as(as = "DurationSeconds<i64>")]
-    pub time_online: chrono::Duration,
+    pub time_online: time::Duration,
     pub login_amt: u64,
 }
  */
@@ -67,7 +68,6 @@ where
     let opt = Option::deserialize(deserializer)?;
     Ok(opt.unwrap_or_default())
 }
-
 use serde_with::{serde_as, DurationSeconds};
 #[serde_as]
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -76,14 +76,14 @@ struct RawSCP {
     FirstSeen: String, //2022-11-16T23:19:58.0702934Z,
     LastSeen: String, //"2022-11-16T23:58:44.5669335Z","PlayTime":0,"SteamID":"76561197960804536@steam","LastNickname":"UnholyChalupa","Usernames":{},"PFlags":[],"TimeOnline":0,"LoginAmount":0}
     #[serde_as(as = "DurationSeconds<i64>")]
-    PlayTime: chrono::Duration,
+    PlayTime: time::Duration,
     SteamID: String,
     LastNickname: Option<String>,
     #[serde(deserialize_with = "deserialize_null_default")]
     Usernames: HashMap<String, String>, // first type doesnt really matter
     PFlags: Vec<RawFlag>, // ill deal with you later...
     #[serde_as(as = "DurationSeconds<i64>")]
-    TimeOnline: chrono::Duration,
+    TimeOnline: time::Duration,
     LoginAmount: u64,
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -92,7 +92,8 @@ struct RawFlag {
     Comment: String,
     Flag: u64,
     Issuer: String,
-    IssueTime: DateTime<Utc>, // istg
+    #[serde(with = "time::serde::rfc3339")]
+    IssueTime: OffsetDateTime, // istg
 }
 
 impl RawFlag {
@@ -166,7 +167,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 "{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})",
             )
             .unwrap()
-            .progress_chars("##-"),
+            .progress_chars("#>-"),
     );
     // here we go
     let async_handle = Arc::new(tokio::runtime::Handle::current());
@@ -191,23 +192,21 @@ async fn main() -> Result<(), anyhow::Error> {
         let last_seen = read_files
             .iter()
             .map(|e| {
-                e.LastSeen
-                    .parse::<DateTime<Utc>>()
-                    .expect("Failed to parse last seen date")
+                time::OffsetDateTime::parse(&e.LastSeen, &Rfc3339)
+                    .expect("Failed to parse last seen")
             })
             .max()
             .expect("Failed to find max date");
-        let first_seen: DateTime<Utc> = read_files
+        let first_seen = read_files
             .iter()
             .map(|e| {
-                e.FirstSeen
-                    .parse::<DateTime<Utc>>()
-                    .unwrap_or(last_seen.clone())
+                time::OffsetDateTime::parse(&e.FirstSeen, &Rfc3339)
+                    .unwrap_or_else(|_| last_seen.clone())
             })
             .min()
             .expect("Failed to find min date");
         // playtime is easy
-        let play_time: chrono::Duration = read_files
+        let play_time: time::Duration = read_files
             .iter()
             .map(|e| e.PlayTime)
             .reduce(|acc, e| acc + e)
@@ -218,7 +217,11 @@ async fn main() -> Result<(), anyhow::Error> {
         // last nickname should be based on last seen
         let last_nickname = read_files
             .iter()
-            .find(|e| e.LastSeen.parse::<DateTime<Utc>>().unwrap() == last_seen)
+            .find(|e| {
+                time::OffsetDateTime::parse(&e.LastSeen, &Rfc3339)
+                    .expect("Failed to parse last seen")
+                    == last_seen
+            })
             .expect("Failed to find last nickname")
             .LastNickname
             .clone()
@@ -247,7 +250,7 @@ async fn main() -> Result<(), anyhow::Error> {
         let flags: Vec<&RawFlag> = read_files.iter().flat_map(|e| e.PFlags.iter()).collect();
 
         // time online is easy
-        let time_online: chrono::Duration = read_files
+        let time_online: time::Duration = read_files
             .iter()
             .map(|e| e.TimeOnline)
             .reduce(|acc, e| acc + e)

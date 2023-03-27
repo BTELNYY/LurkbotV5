@@ -4,6 +4,7 @@ use crate::db::ManagedDB;
 use lurky::query::{Operator, Query, Restriction};
 use rocket::{get, response::status::NotFound, routes, serde::json::Json, Route, State};
 use serde::Serialize;
+use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 
 use crate::db::DBPlayer;
 
@@ -71,7 +72,7 @@ fn create_query_from_str<T: FromStr + Ord + Eq>(s: &str) -> Vec<Query<T>> {
         .collect()
 }
 
-pub fn create_duration_query_from_str(s: &str) -> Vec<Query<chrono::Duration>> {
+pub fn create_duration_query_from_str(s: &str) -> Vec<Query<time::Duration>> {
     s.split(",")
         .filter_map(|f| {
             // first 1-2 chars are the operator
@@ -95,8 +96,36 @@ pub fn create_duration_query_from_str(s: &str) -> Vec<Query<chrono::Duration>> {
             let val = f[op.to_string().len()..].parse::<i64>().ok()?;
             Some(Query {
                 operator: op,
-                val: chrono::Duration::seconds(val),
+                val: time::Duration::seconds(val),
             })
+        })
+        .collect()
+}
+
+fn create_date_query_from_str(s: &str) -> Vec<Query<OffsetDateTime>> {
+    s.split(",")
+        .filter_map(|f| {
+            if f.len() < 2 {
+                return None;
+            }
+            // first 1-2 chars are the operator
+            let op = if let Some('=') = f.chars().nth(1) {
+                &f[0..2]
+            } else {
+                &f[0..1]
+            };
+            let op = match op {
+                "=" => Operator::EqualTo,
+                ">=" => Operator::GreaterThanEqualTo,
+                "<=" => Operator::LessThanEqualTo,
+                ">" => Operator::GreaterThan,
+                "<" => Operator::LessThan,
+                "!=" => Operator::NotEqualTo,
+                _ => return None,
+            };
+            let str = &f[op.to_string().len()..];
+            let val = OffsetDateTime::parse(&str, &Rfc3339).ok()?;
+            Some(Query { operator: op, val })
         })
         .collect()
 }
@@ -120,8 +149,8 @@ pub async fn query_db(
         play_time: create_duration_query_from_str(&play_time.unwrap_or_default()),
         time_online: create_duration_query_from_str(&time_online.unwrap_or_default()),
         login_amt: create_query_from_str(&login_amt.unwrap_or_default()),
-        first_seen: create_query_from_str(&first_seen.unwrap_or_default()),
-        last_seen: create_query_from_str(&last_seen.unwrap_or_default()),
+        first_seen: create_date_query_from_str(&first_seen.unwrap_or_default()),
+        last_seen: create_date_query_from_str(&last_seen.unwrap_or_default()),
     };
     let players = db.get_by_restriction(&rest).await;
     match players {
@@ -157,8 +186,8 @@ pub async fn query_db_random(
         play_time: create_duration_query_from_str(&play_time.unwrap_or_default()),
         time_online: create_duration_query_from_str(&time_online.unwrap_or_default()),
         login_amt: create_query_from_str(&login_amt.unwrap_or_default()),
-        first_seen: create_query_from_str(&first_seen.unwrap_or_default()),
-        last_seen: create_query_from_str(&last_seen.unwrap_or_default()),
+        first_seen: create_date_query_from_str(&first_seen.unwrap_or_default()),
+        last_seen: create_date_query_from_str(&last_seen.unwrap_or_default()),
     };
     let players = db.get_by_restriction_random(&rest).await;
     match players {

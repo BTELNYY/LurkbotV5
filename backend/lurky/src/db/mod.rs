@@ -4,9 +4,9 @@ pub mod postgres;
 use crate::{config::Config, query::Restriction};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::types::PgInterval, FromRow};
+use sqlx::FromRow;
+use time::ext::NumericalDuration;
 
 pub fn wrap_to_u64(x: i64) -> u64 {
     (x as u64).wrapping_add(u64::MAX / 2 + 1)
@@ -19,35 +19,38 @@ pub fn wrap_to_i64(x: u64) -> i64 {
 pub struct Flag {
     pub flag: i64,
     pub issuer: String,
-    pub issued_at: chrono::DateTime<Utc>,
+    pub issued_at: time::OffsetDateTime,
     pub comment: String,
 }
 #[derive(Debug, Clone, FromRow)]
 pub struct DbRow {
     pub id: i64,
-    pub first_seen: chrono::DateTime<Utc>,
-    pub last_seen: chrono::DateTime<Utc>,
-    pub play_time: PgInterval,
+    pub first_seen: time::OffsetDateTime,
+    pub last_seen: time::OffsetDateTime,
+    pub play_time: i64,
     pub last_nickname: String,
     pub nicknames: Vec<String>,
     pub flags: serde_json::Value,
-    pub time_online: PgInterval,
+    pub time_online: i64,
     pub login_amt: i64,
 }
+
 use serde_with::{serde_as, DurationSeconds};
 #[serde_as]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DBPlayer {
     pub id: u64,
-    pub first_seen: chrono::DateTime<Utc>,
-    pub last_seen: chrono::DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub first_seen: time::OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
+    pub last_seen: time::OffsetDateTime,
     #[serde_as(as = "DurationSeconds<i64>")]
-    pub play_time: chrono::Duration,
+    pub play_time: time::Duration,
     pub last_nickname: String,
     pub nicknames: Vec<String>,
     pub flags: Vec<Flag>,
     #[serde_as(as = "DurationSeconds<i64>")]
-    pub time_online: chrono::Duration,
+    pub time_online: time::Duration,
     pub login_amt: u64,
 }
 
@@ -57,21 +60,11 @@ impl DBPlayer {
             id: wrap_to_i64(self.id),
             first_seen: self.first_seen,
             last_seen: self.last_seen,
-            play_time: PgInterval::try_from(
-                self.play_time
-                    .to_std()
-                    .expect("Failed to convert duration to std::time::Duration"),
-            )
-            .expect("Failed to convert duration to PgInterval"),
+            play_time: self.play_time.whole_seconds(),
             last_nickname: self.last_nickname,
             nicknames: self.nicknames,
             flags: serde_json::to_value(self.flags).expect("Flags to serialize"),
-            time_online: PgInterval::try_from(
-                self.time_online
-                    .to_std()
-                    .expect("Failed to convert duration to std::time::Duration"),
-            )
-            .expect("Failed to convert duration to PgInterval"),
+            time_online: self.time_online.whole_seconds(),
             login_amt: wrap_to_i64(self.login_amt),
         }
     }
@@ -80,19 +73,14 @@ impl DBPlayer {
             id: wrap_to_u64(row.id),
             first_seen: row.first_seen,
             last_seen: row.last_seen,
-            play_time: convert_duration(row.play_time),
+            play_time: row.play_time.seconds(),
             last_nickname: row.last_nickname,
             nicknames: row.nicknames,
             flags: serde_json::from_value(row.flags).expect("Flags to deserialize"),
-            time_online: convert_duration(row.time_online),
+            time_online: row.time_online.seconds(),
             login_amt: wrap_to_u64(row.login_amt),
         }
     }
-}
-
-pub fn convert_duration(dur: PgInterval) -> chrono::Duration {
-    chrono::Duration::microseconds(dur.microseconds)
-        + chrono::Duration::days((dur.days + (dur.months * 31)).into())
 }
 
 pub type ManagedDB = Box<dyn DB>;

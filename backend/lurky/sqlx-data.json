@@ -9,11 +9,11 @@
           "Int8",
           "Timestamptz",
           "Timestamptz",
-          "Interval",
+          "Int8",
           "Varchar",
           "VarcharArray",
           "Jsonb",
-          "Interval",
+          "Int8",
           "Int8"
         ]
       }
@@ -41,7 +41,7 @@
         {
           "name": "play_time",
           "ordinal": 3,
-          "type_info": "Interval"
+          "type_info": "Int8"
         },
         {
           "name": "last_nickname",
@@ -61,7 +61,7 @@
         {
           "name": "time_online",
           "ordinal": 7,
-          "type_info": "Interval"
+          "type_info": "Int8"
         },
         {
           "name": "login_amt",
@@ -97,11 +97,11 @@
           "Int8",
           "Timestamptz",
           "Timestamptz",
-          "Interval",
+          "Int8",
           "Varchar",
           "VarcharArray",
           "Jsonb",
-          "Interval",
+          "Int8",
           "Int8"
         ]
       }
@@ -129,7 +129,7 @@
         {
           "name": "play_time",
           "ordinal": 3,
-          "type_info": "Interval"
+          "type_info": "Int8"
         },
         {
           "name": "last_nickname",
@@ -149,7 +149,7 @@
         {
           "name": "time_online",
           "ordinal": 7,
-          "type_info": "Interval"
+          "type_info": "Int8"
         },
         {
           "name": "login_amt",

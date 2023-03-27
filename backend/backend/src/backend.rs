@@ -96,16 +96,16 @@ async fn update_player(
             player.nicknames.push(nick.clone());
         }
         player.last_nickname = nick;
-        player.last_seen = chrono::Utc::now();
-        player.play_time = player.play_time + chrono::Duration::seconds(refresh as i64);
+        player.last_seen = time::OffsetDateTime::now_utc();
+        player.play_time = player.play_time + time::Duration::seconds(refresh as i64);
         if !old_plr_list.iter().any(|e| e.id == raw_player.id) {
             // this player just logged in
-            player.time_online = chrono::Duration::seconds(refresh as i64);
+            player.time_online = time::Duration::seconds(refresh as i64);
             player.login_amt += 1;
         } else {
-            player.time_online = player.time_online + chrono::Duration::seconds(refresh as i64);
+            player.time_online = player.time_online + time::Duration::seconds(refresh as i64);
         }
-        //player.time_online = player.time_online + chrono::Duration::seconds(refresh as i64);
+        //player.time_online = player.time_online + time::Duration::seconds(refresh as i64);
         //player.login_amt += 1;
         db.update_player(player).await.unwrap();
     } else {
@@ -116,11 +116,11 @@ async fn update_player(
                 id,
                 last_nickname: nick.clone(),
                 nicknames: vec![nick],
-                last_seen: chrono::Utc::now(),
-                first_seen: chrono::Utc::now(),
-                play_time: chrono::Duration::seconds(refresh as i64),
+                last_seen: time::OffsetDateTime::now_utc(),
+                first_seen: time::OffsetDateTime::now_utc(),
+                play_time: time::Duration::seconds(refresh as i64),
                 flags: vec![],
-                time_online: chrono::Duration::seconds(refresh as i64),
+                time_online: time::Duration::seconds(refresh as i64),
                 login_amt: 1,
             })
             .await;

@@ -12,7 +12,7 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 # Build application
 COPY . .
-RUN cargo build --release -p http
+RUN cargo build --release -p backend
 
 # We do not need the Rust toolchain to run the binary!
 FROM debian:buster-slim AS runtime

@@ -1,2 +1,10 @@
 [workspace]
 members = ["backend", "migrate", "lurky"]
+
+[profile.dev.package."*"]
+# Set the default for dependencies in Development mode.
+opt-level = 3
+
+[profile.dev]
+# Turn on a small amount of optimisation in Development mode.
+opt-level = 1
