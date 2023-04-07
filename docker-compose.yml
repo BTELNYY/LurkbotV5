@@ -4,6 +4,8 @@ services:
     expose:
       - "8000"
     restart: unless-stopped
+    environment:
+      - ROCKET_PORT=8000
     volumes:
       - ./config.txt:/app/config.txt
     entrypoint: /usr/local/bin/backend /app/config.txt
