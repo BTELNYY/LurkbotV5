@@ -35,7 +35,7 @@ services:
       - POSTGRES_USER=lurky
       - POSTGRES_PASSWORD=put_a_good_password_here
     volumes: 
-      - db:/var/lib/postgresql/data
+      - ./db:/var/lib/postgresql/data
 
 
 volumes:
