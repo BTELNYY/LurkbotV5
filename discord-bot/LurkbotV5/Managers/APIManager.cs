@@ -16,7 +16,7 @@ namespace LurkbotV5.Managers
     public static class APIManager
     {
         public static readonly string DevURL = @"http://localhost:8000/";
-        public static readonly string ProdURL = @"http://backend:80/";
+        public static readonly string ProdURL = @"http://backend:8000/";
         public static string CurrentURL { get; private set; } = "?";
 
         public static void Init()
