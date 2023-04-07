@@ -8,7 +8,10 @@ namespace LurkbotV5
     {
         public static bool CustomConfigPath = false;
         public static string CustomPath = "";
-        public static void Main(string[] args)
+
+        public static Task Main(string[] args) => new Program().MainAsync(args);
+
+        public async Task MainAsync(string[] args)
         {
             if (args.Contains("--config") && args.Length >= 2)
             {
@@ -26,6 +29,7 @@ namespace LurkbotV5
             Bot bot = new(config, client, discordManager);
             discordManager.SetBot(bot);
             bot.StartBot();
+            await Task.Delay(-1);
         }
     }
 }
