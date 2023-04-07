@@ -25,9 +25,48 @@ namespace LurkbotV5
             Client = client;
         }
 
+        public Task OnMessageDeleted(Cacheable<IMessage, ulong> msg, Cacheable<IMessageChannel, ulong> channel)
+        {
+            if (msg.Value == null)
+            {
+                Log.WriteWarning("OnGhostPing msg is null!");
+            }
+            if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
+            {
+                return Task.CompletedTask;
+            }
+            var channel1 = GetBot().GetClient().GetChannel(GetBot().GetConfig().DeletedMessagesChannelID) as ITextChannel;
+            if (channel1 == null)
+            {
+                Log.WriteFatal("Channel not found! " + GetBot().GetConfig().DeletedMessagesChannelID);
+                return Task.CompletedTask;
+            }
+            Log.WriteDebug("Channel obtained");
+            EmbedBuilder eb = new();
+            eb.WithTitle("Deleted Message");
+            eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
+            eb.AddField("Channel", "<#" + channel.Id + ">");
+            eb.AddField("Content (text) ", msg.Value.Content);
+            if (msg.Value.Embeds.Count > 0)
+            {
+                Embed[] embeds = { eb.Build() };
+                foreach (var embed in msg.Value.Embeds)
+                {
+                    embeds.Append(embed);
+                }
+                channel1.SendMessageAsync(embeds: embeds);
+            }
+            else
+            {
+                channel1.SendMessageAsync(embed: eb.Build());
+            }
+            return Task.CompletedTask;
+        }
+
         public void EventInit()
         {
             Client.SlashCommandExecuted += SlashCommandHandler;
+            Client.MessageDeleted += OnMessageDeleted;
         }
 
         public void BuildInit()
@@ -144,7 +183,6 @@ namespace LurkbotV5
                 await mestoEdituser.ModifyAsync(properties => { properties.Embeds = embeds.ToArray(); });
             }
         }
-
 
         public void SetBot(Bot bot)
         {

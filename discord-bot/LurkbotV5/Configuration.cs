@@ -11,6 +11,7 @@ namespace LurkbotV5
         public string AuthKey { get; set; } = "key";
         public ulong UpdateChannelID { get; set; } = 0;
         public ulong GuildID { get; set; } = 0;
+        public ulong DeletedMessagesChannelID { get; set; } = 0;
         public Dictionary<string, string> ServerNames { get; set; } = new();
 
         public Configuration()
@@ -38,6 +39,7 @@ namespace LurkbotV5
             UpdateChannelID = configData.GetULong("update_channel_id", 0);
             GuildID = configData.GetULong("guild_id", 0);
             ServerNames = configData.GetDict("server_names", new Dictionary<string, string>());
+            DeletedMessagesChannelID = configData.GetULong("deleted_message_channel_id", 0);
             foreach(string key in ServerNames.Keys)
             {
                 Log.WriteDebug(key + ": " + ServerNames[key]);
