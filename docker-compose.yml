@@ -9,6 +9,8 @@ services:
     volumes:
       - ./config.txt:/app/config.txt
     entrypoint: /usr/local/bin/backend /app/config.txt
+    links:
+      - db
     depends_on:
       db:
         condition: service_healthy
@@ -17,10 +19,12 @@ services:
     restart: unless-stopped
     volumes:
       - ./config.txt:/app/config.txt
-      - ./statistics:/app/statistics
+      - bot_db:/app/statistics
       - ./logs:/app/logs/
     environment:
       - RUNNING_IN_DOCKER=true
+    links:
+      - backend
     depends_on:
       backend:
         condition: service_healthy
@@ -42,4 +46,6 @@ services:
 
 volumes:
   db:
+    driver: local
+  bot_db:
     driver: local
