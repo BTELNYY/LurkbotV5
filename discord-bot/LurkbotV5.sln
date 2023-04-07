@@ -5,7 +5,7 @@ VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LurkbotV5", "LurkbotV5\LurkbotV5.csproj", "{23EAC3AD-2AEC-4E65-B901-574F56F60B96}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "btelnyy.ConfigLoader.API", "..\..\btelnyy-ConfigLoader\btelnyy-ConfigLoader.API\btelnyy.ConfigLoader.API.csproj", "{D78A33C7-11C2-48BB-9415-AC2B9B315112}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "btelnyy.ConfigLoader.API", "btelnyy-ConfigLoader\btelnyy-ConfigLoader.API\btelnyy.ConfigLoader.API.csproj", "{D78A33C7-11C2-48BB-9415-AC2B9B315112}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
