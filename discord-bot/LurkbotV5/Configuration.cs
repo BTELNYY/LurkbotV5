@@ -38,6 +38,10 @@ namespace LurkbotV5
             UpdateChannelID = configData.GetULong("update_channel_id", 0);
             GuildID = configData.GetULong("guild_id", 0);
             ServerNames = configData.GetDict("server_names", new Dictionary<string, string>());
+            foreach(string key in ServerNames.Keys)
+            {
+                Log.WriteDebug(key + ": " + ServerNames[key]);
+            }
         }
     }
 }

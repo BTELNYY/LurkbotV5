@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections;
 
 namespace LurkbotV5.Managers
 {
@@ -29,7 +31,6 @@ namespace LurkbotV5.Managers
             }
         }
 
-
         public static string TestAuth(string token)
         {
             try
@@ -45,12 +46,69 @@ namespace LurkbotV5.Managers
                 string result = response.Result;
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.WriteError(ex.ToString());
                 return "Error";
             }
         }
+
+        public static PlayerStats GetPlayerStats(string? input)
+        {
+            if(input is null)
+            {
+                return new PlayerStats();
+            }
+            bool IsID = false;
+            bool IsNorthwood = false;
+            bool HasAtSymbol = false;
+            HasAtSymbol = input.Contains('@');
+            if (HasAtSymbol && ulong.TryParse(input.Split('@')[0], out ulong id))
+            {
+                IsID = true;
+            }
+            if(input.Length == 17 && ulong.TryParse(input, out id))
+            {
+                IsID = true;
+            }
+            if (HasAtSymbol && input.Split('@')[1] == "northwood")
+            {
+                IsNorthwood = true;
+            }
+
+            string url = CurrentURL;
+            string html = string.Empty;
+            string requrl = "";
+
+            if(IsID)
+            {
+                requrl = "query/id/" + input;
+            }
+            if(!IsID || IsNorthwood)
+            {
+                requrl = "query/last_nick/" + input;
+            }
+
+            var client = new HttpClient();
+            Log.WriteDebug(url + requrl);
+            try
+            {
+                var response = client.GetStringAsync(url + requrl);
+                response.Wait();
+                string result = response.Result;
+                Log.WriteDebug(result);
+                return JsonConvert.DeserializeObject<PlayerStats>(result);
+            }
+            catch(Exception ex)
+            {
+                Log.WriteError("Error when fetching player details! \n" + ex.ToString());
+                PlayerStats p = new PlayerStats();
+                //this is a janky way to handle this, but it works
+                p.PlayTime = -1;
+                return p;
+            }
+        }
+
 
         public static NWAllResponse GetServerStatus(string token)
         {
@@ -58,14 +116,24 @@ namespace LurkbotV5.Managers
             {
                 string url = CurrentURL;
                 string html = string.Empty;
-                string requrl = "test/";
+                string requrl = "nw/all";
 
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+                Log.WriteDebug(url + requrl);
                 var response = client.GetStringAsync(url + requrl);
                 response.Wait();
                 string result = response.Result;
-                return JsonConvert.DeserializeObject<NWAllResponse>(result);
+                Log.WriteDebug(result);
+                List<ServerResponse>? list = JsonConvert.DeserializeObject<List<ServerResponse>>(result);
+                if (list == null)
+                {
+                    Log.WriteError("Failed to parse List of responses.");
+                    return new NWAllResponse();
+                }
+                NWAllResponse resp = new NWAllResponse();
+                resp.value = list.ToArray();
+                return resp;
             }
             catch (Exception ex)
             {
@@ -75,10 +143,76 @@ namespace LurkbotV5.Managers
         }
     }
 
+    public struct PlayerStats
+    {
+        [JsonProperty("id")]
+        public string SteamID;
+        [JsonProperty("first_seen")]
+        public DateTime FirstSeen;
+        [JsonProperty("last_seen")]
+        public DateTime LastSeen;
+        [JsonProperty("play_time")]
+        public long PlayTime;
+        [JsonProperty("last_nickname")]
+        public string LastNickname;
+        [JsonProperty("nicknames")]
+        public List<string> Usernames;
+        [JsonProperty("flags")]
+        public List<Flags> PFlags;
+        [JsonProperty("time_online")]
+        public long TimeOnline;
+        [JsonProperty("login_amt")]
+        public uint LoginAmount;
+
+        public PlayerStats(Player p)
+        {
+            SteamID = p.ID;
+            LastNickname = p.Nickname;
+            FirstSeen = DateTime.UtcNow;
+            LastSeen = DateTime.UtcNow;
+            PlayTime = 0L;
+            PFlags = new List<Flags>();
+            Usernames = new List<string>();
+            TimeOnline = 0L;
+            LoginAmount = 0;
+        }
+        public void ResetOnlineTime()
+        {
+            TimeOnline = 0;
+        }
+    }
+
+
+    public struct Flags
+    {
+        public PlayerFlags Flag;
+        public string Issuer;
+        public DateTime IssueTime;
+        public string Comment;
+    }
+
+    public enum PlayerFlags
+    {
+        KOS,
+        MASSKOS,
+        RACISM,
+        CHEATING,
+        CAMPING,
+        MICSPAM,
+        TEAMING,
+        SEXUALCOMMENTS,
+        REPORTABUSE,
+        BITCH,
+        NONE,
+        SEXISM,
+        HOMOPHOBIA,
+        TRANSPHOBIA,
+        HATESPEECH
+    }
+
     public struct NWAllResponse
     {
-        public ServerResponse value;
-        public int count;
+        public ServerResponse[] value;
     }
 
     public struct ServerResponse
@@ -96,12 +230,12 @@ namespace LurkbotV5.Managers
 
         public string[] GetPlayerNames()
         {
-            string[] strings = { };
-            foreach(var player in PlayersList)
+            List<string> names = new List<string>();
+            foreach (Player player in PlayersList)
             {
-                strings.Append(player.Nickname);
+                names.Add(player.Nickname);
             }
-            return strings;
+            return names.ToArray();
         }
     }
 

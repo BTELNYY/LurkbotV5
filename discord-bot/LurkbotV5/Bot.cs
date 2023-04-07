@@ -11,6 +11,8 @@ namespace LurkbotV5
         public DiscordSocketClient? Client { get; private set; }
         public DiscordManager? DiscordManager { get; private set; }
 
+        public static Bot Instance { get; private set; }
+
         public Bot(Configuration? config, DiscordSocketClient? client, DiscordManager? discordManager)
         {
             Config = config;
@@ -46,6 +48,15 @@ namespace LurkbotV5
 
         public async void StartBot()
         {
+            //singleton
+            if(Instance != null && Instance != this)
+            {
+                return;
+            }
+            else
+            {
+                Instance = this;
+            }
             Log.WriteInfo("Starting Bot...");
             if (Client == null)
             {
@@ -86,6 +97,7 @@ namespace LurkbotV5
             }
             DiscordManager.EventInit();
             DiscordManager.BuildInit();
+            DiscordManager.CommandInit();
             DiscordManager.RepeatTaskInit();
         }
 

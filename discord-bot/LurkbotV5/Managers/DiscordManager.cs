@@ -18,7 +18,7 @@ namespace LurkbotV5
         public Bot? Bot { get; private set; }
         public DiscordSocketClient Client { get; private set; }
         
-        public Dictionary<string, CommandBase> Commands { get; private set; } = new Dictionary<string, CommandBase>();
+        public static Dictionary<string, CommandBase> Commands { get; private set; } = new Dictionary<string, CommandBase>();
 
         public DiscordManager(DiscordSocketClient client) 
         {
@@ -27,12 +27,20 @@ namespace LurkbotV5
 
         public void EventInit()
         {
-
+            Client.SlashCommandExecuted += SlashCommandHandler;
         }
 
         public void BuildInit()
         {
             
+        }
+
+        public void CommandInit()
+        {
+            BuildCommand(new CommandGetPlayerStats());
+            BuildCommand(new CommandGetPFP());
+            BuildCommand(new CommandPing());
+            BuildCommand(new CommandPlayers());
         }
 
         public void RepeatTaskInit()
@@ -59,79 +67,84 @@ namespace LurkbotV5
             ulong channelid = config.UpdateChannelID;
             NWAllResponse response = APIManager.GetServerStatus(GetBot().GetConfig().AuthKey);
 
-            if(response.count == 0)
+            if(response.value.Count() == 0)
             {
                 Log.WriteError("Failed to fetch servers: server count is 0");
                 return;
             }
-
-            foreach(Server s in response.value.Servers)
+            List<Embed> embeds = new List<Embed>();
+            foreach (ServerResponse s in response.value)
             {
-                Log.WriteDebug("Creating embed");
-                string name = "";
-                if (GetBot().GetConfig().ServerNames.ContainsKey(s.ID.ToString()))
+                Log.WriteDebug("Creating embeds");
+                foreach (Server s1 in s.Servers)
                 {
-                    name = GetBot().GetConfig().ServerNames[s.ID.ToString()];
-                }
-                else
-                {
-                    name = "[Missing Server Name]";
-                }
-                var embed = new EmbedBuilder
-                {
-                    Title = name
-                };
-                embed.WithDescription("Players currently online:\n```\n" + String.Join("\n", s.GetPlayerNames()) + "```")
-                    .WithCurrentTimestamp()
-                    .WithColor(Color.Green)
-                    .AddField("Players online", s.PlayersList.Length);
-                Log.WriteDebug("Embed created");
-                var channel = GetBot().GetClient().GetChannel(GetBot().GetConfig().UpdateChannelID) as ITextChannel;
-                if (channel == null)
-                {
-                    Log.WriteFatal("Channel not found! " + GetBot().GetConfig().UpdateChannelID);
-                    return;
-                }
-                Log.WriteDebug("Channel obtained");
-                var meses = await channel.GetMessagesAsync().FlattenAsync();
-                Log.WriteDebug("Messages obtained");
-                if (meses == null)
-                {
-                    Log.WriteWarning("No messages, cringe");
-                    await channel.SendMessageAsync(embed: embed.Build());
-                    return;
-                }
-                Log.WriteDebug("Searching for messages from bot");
-                var botMes = meses.Where((message => message.Author.Id == GetBot().GetClient().CurrentUser.Id));
-                Log.WriteDebug("Getting first bot message");
-                if (!botMes.Any())
-                {
-                    Log.WriteWarning("No messages, cringe");
-                    await channel.SendMessageAsync(embed: embed.Build());
-                    return;
-                }
-                var messagetoEdit = botMes.First();
-                Log.WriteDebug("Checking dat shit");
-                if (messagetoEdit == null)
-                {
-                    // create new message
-                    Log.WriteDebug("Create new message");
-                    await channel.SendMessageAsync(embed: embed.Build());
-                }
-                else
-                {
-                    // edit message
-                    Log.WriteDebug("Edit message");
-                    var mestoEdituser = messagetoEdit as IUserMessage;
-                    if (mestoEdituser == null)
+                    string name = "";
+                    if (GetBot().GetConfig().ServerNames.ContainsKey(s1.ID.ToString()))
                     {
-                        Log.WriteFatal("not a IUserMessage");
-                        return;
+                        name = GetBot().GetConfig().ServerNames[s1.ID.ToString()];
                     }
-                    await mestoEdituser.ModifyAsync(properties => { properties.Embed = embed.Build(); });
+                    else
+                    {
+                        name = "[Missing Server Name]";
+                    }
+                    var embed = new EmbedBuilder
+                    {
+                        Title = name
+                    };
+                    embed.WithDescription("Players currently online:\n```\n" + string.Join("\n", s1.GetPlayerNames()) + "```")
+                        .WithCurrentTimestamp()
+                        .WithColor(Color.Green)
+                        .AddField("Players online", s1.PlayersList.Length);
+                    Log.WriteDebug("Embed created");
+                    embeds.Add(embed.Build());
                 }
             }
+            var channel = GetBot().GetClient().GetChannel(GetBot().GetConfig().UpdateChannelID) as ITextChannel;
+            if (channel == null)
+            {
+                Log.WriteFatal("Channel not found! " + GetBot().GetConfig().UpdateChannelID);
+                return;
+            }
+            Log.WriteDebug("Channel obtained");
+            var meses = await channel.GetMessagesAsync().FlattenAsync();
+            Log.WriteDebug("Messages obtained");
+            if (meses == null)
+            {
+                Log.WriteWarning("No messages, cringe");
+                await channel.SendMessageAsync(embeds: embeds.ToArray());
+                return;
+            }
+            Log.WriteDebug("Searching for messages from bot");
+            var botMes = meses.Where((message => message.Author.Id == GetBot().GetClient().CurrentUser.Id));
+            Log.WriteDebug("Getting first bot message");
+            if (!botMes.Any())
+            {
+                Log.WriteWarning("No messages, cringe");
+                await channel.SendMessageAsync(embeds: embeds.ToArray());
+                return;
+            }
+            var messagetoEdit = botMes.First();
+            Log.WriteDebug("Checking dat shit");
+            if (messagetoEdit == null)
+            {
+                // create new message
+                Log.WriteDebug("Create new message");
+                await channel.SendMessageAsync(embeds: embeds.ToArray());
+            }
+            else
+            {
+                // edit message
+                Log.WriteDebug("Edit message");
+                var mestoEdituser = messagetoEdit as IUserMessage;
+                if (mestoEdituser == null)
+                {
+                    Log.WriteFatal("not a IUserMessage");
+                    return;
+                }
+                await mestoEdituser.ModifyAsync(properties => { properties.Embeds = embeds.ToArray(); });
+            }
         }
+
 
         public void SetBot(Bot bot)
         {
@@ -203,6 +216,25 @@ namespace LurkbotV5
             {
                 Log.WriteError("Failed to build command: " + command.CommandName + "\n Error: \n " + exception.ToString());
             }
+        }
+
+        public static Task SlashCommandHandler(SocketSlashCommand command)
+        {
+            if (!Commands.ContainsKey(command.CommandName))
+            {
+                Log.WriteError("Command Not registered in Dict: " + command.CommandName);
+                return Task.CompletedTask;
+            }
+            try
+            {
+                Commands[command.CommandName].Execute(command);
+            }
+            catch (Exception ex)
+            {
+                Log.WriteError("Executing Command " + command.CommandName + " threw an exception: \n" + ex.ToString());
+                return Task.CompletedTask;
+            }
+            return Task.CompletedTask;
         }
     }
 }

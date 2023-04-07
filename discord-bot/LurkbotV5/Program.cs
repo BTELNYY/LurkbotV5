@@ -1,6 +1,7 @@
 ﻿using Discord.WebSocket;
 using Discord;
 using System;
+using LurkbotV5.Managers;
 
 namespace LurkbotV5
 {
@@ -26,6 +27,7 @@ namespace LurkbotV5
             Configuration config = new();
             DiscordSocketClient client = new(cfg);
             DiscordManager discordManager = new(client);
+            APIManager.Init();
             Bot bot = new(config, client, discordManager);
             discordManager.SetBot(bot);
             bot.StartBot();
