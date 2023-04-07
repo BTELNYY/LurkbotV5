@@ -2,10 +2,11 @@ services:
   backend:
     build: ./backend
     expose:
-      - "8000"
+      - "80"
     restart: unless-stopped
     environment:
-      - ROCKET_PORT=8000
+      - ROCKET_PORT=80
+      -  ROCKET_ADDRESS=0.0.0.0
     volumes:
       - ./config.txt:/app/config.txt
     entrypoint: /usr/local/bin/backend /app/config.txt
