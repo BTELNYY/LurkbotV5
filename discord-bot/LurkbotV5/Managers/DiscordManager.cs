@@ -348,6 +348,10 @@ namespace LurkbotV5
             if (!Commands.ContainsKey(command.CommandName))
             {
                 Log.WriteError("Command Not registered in Dict: " + command.CommandName);
+                command.RespondAsync("Sorry, this command is not registered internally, contact the developer about this.");
+                var result = Bot.Instance.GetClient().GetGlobalApplicationCommandAsync(command.CommandId);
+                result.AsTask().Wait();
+                result.Result.DeleteAsync().Wait();
                 return Task.CompletedTask;
             }
             try
@@ -362,7 +366,7 @@ namespace LurkbotV5
             return Task.CompletedTask;
         }
 
-        #region Rank and UserConfig
+
 
         public void DestroyAllAppCommands()
         {
@@ -371,7 +375,7 @@ namespace LurkbotV5
             foreach (var thing in commands.Result)
             {
                 Log.WriteDebug("Destroying command: " + thing.Name);
-                thing.DeleteAsync();
+                thing.DeleteAsync().Wait();
             }
         }
         public Task LevelUpMessageEvent(SocketMessage msg)
@@ -512,6 +516,8 @@ namespace LurkbotV5
             }
             return Task.CompletedTask;
         }
+
+        #region Rank and UserConfig
         public static bool AddLevelRole(uint level, ulong roleid, RoleLevelActions action)
         {
             if (LevelRoles.RoleLevels.ContainsKey(level))
