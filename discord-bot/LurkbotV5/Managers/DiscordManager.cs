@@ -366,7 +366,9 @@ namespace LurkbotV5
 
         public void DestroyAllAppCommands()
         {
-            foreach (var thing in GetBot().GetClient().GetGlobalApplicationCommandsAsync().Result)
+            var commands = GetBot().GetClient().GetGlobalApplicationCommandsAsync();
+            commands.Wait();
+            foreach (var thing in commands.Result)
             {
                 thing.DeleteAsync();
             }
