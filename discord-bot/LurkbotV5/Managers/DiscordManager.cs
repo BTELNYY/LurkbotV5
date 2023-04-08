@@ -28,9 +28,9 @@ namespace LurkbotV5
         public static LevelRoles LevelRoles { get; private set; }
         public static Dictionary<string, CommandBase> Commands { get; private set; } = new Dictionary<string, CommandBase>();
 
-        public static readonly string UserConfigPath = "/statistics/users/";
+        public static readonly string UserConfigPath = "./statistics/users/";
 
-        public static readonly string ServerConfigPath = $"/statistics/server/{Bot.Instance.GetConfig().GuildID}/";
+        public static readonly string ServerConfigPath = $"./statistics/server/{Bot.Instance.GetConfig().GuildID}/";
 
         public DiscordManager(DiscordSocketClient client)
         {
