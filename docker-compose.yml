@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./config.txt:/app/config.txt
-      - bot_db:/app/statistics
+      - ./statistics:/app/statistics/
       - ./logs:/app/logs/
     environment:
       - RUNNING_IN_DOCKER=true
@@ -47,6 +47,4 @@ services:
 
 volumes:
   db:
-    driver: local
-  bot_db:
     driver: local
