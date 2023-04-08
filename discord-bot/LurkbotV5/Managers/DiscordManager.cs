@@ -370,6 +370,7 @@ namespace LurkbotV5
             commands.Wait();
             foreach (var thing in commands.Result)
             {
+                Log.WriteDebug("Destroying command: " + thing.Name);
                 thing.DeleteAsync();
             }
         }
