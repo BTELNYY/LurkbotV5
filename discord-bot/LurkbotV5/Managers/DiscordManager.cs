@@ -9,6 +9,7 @@ using Discord.Net;
 using LurkbotV5.Commands;
 using System.Diagnostics.Metrics;
 using LurkbotV5.Managers;
+using System.Security.Cryptography.X509Certificates;
 
 namespace LurkbotV5
 {
@@ -17,10 +18,21 @@ namespace LurkbotV5
     {
         public Bot? Bot { get; private set; }
         public DiscordSocketClient Client { get; private set; }
-        
+
+        public static Dictionary<ulong, DiscordUserConfig> UserCache = new();
+
+        public static Dictionary<ulong, string> LastMessageCache = new();
+
+        public static DiscordConfig DiscordConfig { get; private set; }
+
+        public static LevelRoles LevelRoles { get; private set; }
         public static Dictionary<string, CommandBase> Commands { get; private set; } = new Dictionary<string, CommandBase>();
 
-        public DiscordManager(DiscordSocketClient client) 
+        public static readonly string UserConfigPath = "/statistics/users/";
+
+        public static readonly string ServerConfigPath = $"/statistics/server/{Bot.Instance.GetConfig().GuildID}/";
+
+        public DiscordManager(DiscordSocketClient client)
         {
             Client = client;
         }
@@ -113,11 +125,37 @@ namespace LurkbotV5
             Client.SlashCommandExecuted += SlashCommandHandler;
             Client.MessageDeleted += OnMessageDeleted;
             Client.MessageDeleted += OnGhostPinging;
+            Client.MessageReceived += LevelUpMessageEvent;
+            Client.UserJoined += OnUserJoin;
+            Client.UserBanned += OnUserBanned;
         }
 
-        public void BuildInit()
+        public void DiscordConfigInit()
         {
-
+            string guildid = GetBot().GetConfig().GuildID.ToString();
+            if(!Directory.Exists(ServerConfigPath + guildid))
+            {
+                Directory.CreateDirectory(ServerConfigPath + guildid);
+            }
+            if (File.Exists(ServerConfigPath + "config.json"))
+            {
+                string json = File.ReadAllText(ServerConfigPath + "config.json");
+                DiscordConfig = JsonConvert.DeserializeObject<DiscordConfig>(json);
+            }
+            else
+            {
+                GenerateServerConfig();
+            }
+            if (File.Exists(ServerConfigPath + "level_roles.json"))
+            {
+                string json = File.ReadAllText(ServerConfigPath + "level_roles.json");
+                LevelRoles = JsonConvert.DeserializeObject<LevelRoles>(json);
+            }
+            else
+            {
+                string json = JsonConvert.SerializeObject(new LevelRoles());
+                File.WriteAllText(ServerConfigPath + "level_roles.json", json);
+            }
         }
 
         public void CommandInit()
@@ -126,6 +164,8 @@ namespace LurkbotV5
             BuildCommand(new CommandGetPFP());
             BuildCommand(new CommandPing());
             BuildCommand(new CommandPlayers());
+            BuildCommand(new CommandRank());
+            BuildCommand(new CommandDestroyAppCommands());
         }
 
         public void RepeatTaskInit()
@@ -152,7 +192,7 @@ namespace LurkbotV5
             ulong channelid = config.UpdateChannelID;
             NWAllResponse response = APIManager.GetServerStatus(GetBot().GetConfig().AuthKey);
 
-            if(response.value.Count() == 0)
+            if (response.value.Count() == 0)
             {
                 Log.WriteError("Failed to fetch servers: server count is 0");
                 return;
@@ -253,7 +293,7 @@ namespace LurkbotV5
         {
             DiscordSocketClient client = Client;
             SlashCommandBuilder scb = new();
-            if(Bot == null || Bot.Config == null)
+            if (Bot == null || Bot.Config == null)
             {
                 Log.WriteFatal("Bot and Config are null!");
                 return;
@@ -321,5 +361,449 @@ namespace LurkbotV5
             }
             return Task.CompletedTask;
         }
+
+        #region Rank and UserConfig
+
+        public void DestroyAllAppCommands()
+        {
+            foreach (var thing in GetBot().GetClient().GetGlobalApplicationCommandsAsync().Result)
+            {
+                thing.DeleteAsync();
+            }
+        }
+        public Task LevelUpMessageEvent(SocketMessage msg)
+        {
+            if (GetBot().GetConfig().DisableNonSLCommands)
+            {
+                return Task.CompletedTask;
+            }
+            if (msg.Author.IsBot)
+            {
+                return Task.CompletedTask;
+            }
+            if (!CheckMessage(msg.Content, msg.Author.Id))
+            {
+                return Task.CompletedTask;
+            }
+            if (LastMessageCache.ContainsKey(msg.Author.Id))
+            {
+                LastMessageCache[msg.Author.Id] = msg.Content;
+            }
+            else
+            {
+                LastMessageCache.Add(msg.Author.Id, msg.Content);
+            }
+            Random r = new();
+            float num = r.Next(1, 100);
+            if (num > DiscordConfig.XPEarnChance)
+            {
+                return Task.CompletedTask;
+            }
+            else
+            {
+                DiscordUserConfig cfg = GetUserConfig(msg.Author.Id);
+                if (cfg.LockXP)
+                {
+                    return Task.CompletedTask;
+                }
+                float xpsum = r.Next((int)DiscordConfig.MinXPPerMessage, (int)DiscordConfig.MaxXPPerMessage);
+                xpsum += r.NextSingle();
+                uint level = cfg.XPLevel;
+                float XP = cfg.XP;
+                float requiredXP = GetXPPerLevel(level);
+                float XPCalculated = (XP + xpsum) * DiscordConfig.XPMultiplier;
+                bool levelIncreased = false;
+                Log.WriteDebug("Checking XP stats now");
+                if (XPCalculated > requiredXP)
+                {
+                    levelIncreased = true;
+                    level++;
+                    XP = XPCalculated - requiredXP;
+                }
+                else
+                {
+                    XP = XPCalculated;
+                }
+                cfg.XP = XP;
+                cfg.XPLevel = level;
+                Log.WriteDebug($"XP: {XP}, Level: {level}");
+                //speeds up calculations for later.
+                if (DiscordConfig.XPLevels.ContainsKey(level))
+                {
+                    DiscordConfig.XPLevels.Remove(level);
+                }
+                DiscordConfig.XPLevels.Add(level, requiredXP);
+                Log.WriteDebug("Setting XP level to dict..");
+                SetUserConfig(cfg);
+                if (!levelIncreased)
+                {
+                    return Task.CompletedTask;
+                }
+                SocketGuildUser user = (SocketGuildUser)msg.Author;
+                if (!LevelRoles.RoleLevels.ContainsKey(level))
+                {
+                    return Task.CompletedTask;
+                }
+                else
+                {
+                    foreach (RoleLevel role in LevelRoles.RoleLevels[level])
+                    {
+                        ulong roleid = role.RoleID;
+                        RoleLevelActions action = role.Action;
+                        switch (action)
+                        {
+                            case RoleLevelActions.ADD:
+                                user.AddRoleAsync(roleid);
+                                break;
+                            case RoleLevelActions.REMOVE:
+                                user.RemoveRoleAsync(roleid);
+                                break;
+                            default:
+                                return Task.CompletedTask;
+                        }
+                        return Task.CompletedTask;
+                    }
+                }
+            }
+            return Task.CompletedTask;
+        }
+        public Task OnUserBanned(SocketUser user, SocketGuild guild)
+        {
+            DeleteUserConfig(user.Id, guild.Id);
+            return Task.CompletedTask;
+        }
+        public Task OnUserJoin(SocketGuildUser user)
+        {
+            ulong id = user.Id;
+            DiscordUserConfig config = GetUserConfig(id);
+            foreach (uint level in LevelRoles.RoleLevels.Keys)
+            {
+                foreach (RoleLevel role in LevelRoles.RoleLevels[level])
+                {
+                    if (config.XPLevel < level)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        if (role.Action == RoleLevelActions.REMOVE)
+                        {
+                            SocketGuild guild = Bot.Instance.GetClient().GetGuild(Bot.Instance.GetConfig().GuildID);
+                            SocketRole grole = guild.GetRole(role.RoleID);
+                            if (user != null && user.Roles.Contains(grole))
+                            {
+                                user.RemoveRoleAsync(grole);
+                            }
+                        }
+                        else if (role.Action == RoleLevelActions.ADD)
+                        {
+                            SocketGuild guild = Bot.Instance.GetClient().GetGuild(Bot.Instance.GetConfig().GuildID);
+                            SocketRole grole = guild.GetRole(role.RoleID);
+                            if (user != null && grole != null && !user.Roles.Contains(grole))
+                            {
+                                user.AddRoleAsync(grole);
+                            }
+                        }
+                    }
+                }
+            }
+            return Task.CompletedTask;
+        }
+        public static bool AddLevelRole(uint level, ulong roleid, RoleLevelActions action)
+        {
+            if (LevelRoles.RoleLevels.ContainsKey(level))
+            {
+                if (LevelRoles.RoleLevels[level].Contains(new RoleLevel(roleid, action)))
+                {
+                    return false;
+                }
+                LevelRoles.RoleLevels[level].Add(new RoleLevel(roleid, action));
+                return true;
+            }
+            else
+            {
+                List<RoleLevel> l = new();
+                l.Add(new RoleLevel(roleid, action));
+                LevelRoles.RoleLevels.Add(level, l);
+                try
+                {
+                    WriteConfig();
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+        public static bool RemoveLevelRole(uint level, ulong roleid)
+        {
+            if (!LevelRoles.RoleLevels.ContainsKey(level))
+            {
+                return false;
+            }
+            else
+            {
+                foreach (uint levels in LevelRoles.RoleLevels.Keys)
+                {
+                    if (LevelRoles.RoleLevels[levels].Count == 1)
+                    {
+                        LevelRoles.RoleLevels.Remove(levels);
+                        if (levels == level)
+                        {
+                            return true;
+                        }
+                    }
+                    foreach (RoleLevel rlvl in LevelRoles.RoleLevels[levels])
+                    {
+                        if (rlvl.RoleID == roleid)
+                        {
+                            LevelRoles.RoleLevels[levels].Remove(rlvl);
+                        }
+                    }
+                }
+                try
+                {
+                    WriteConfig();
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+        public static DiscordUserConfig GetUserConfig(ulong UserID)
+        {
+            string userpath = UserConfigPath + UserID.ToString() + ".json";
+            if (UserCache.ContainsKey(UserID))
+            {
+                return UserCache[UserID];
+            }
+            if (!File.Exists(userpath))
+            {
+                DiscordUserConfig config = new(UserID);
+                File.WriteAllText(userpath, JsonConvert.SerializeObject(config));
+                UserCache.Add(UserID, config);
+                return config;
+            }
+            else
+            {
+                DiscordUserConfig config = JsonConvert.DeserializeObject<DiscordUserConfig>(File.ReadAllText(userpath));
+                UserCache.Add(UserID, config);
+                return config;
+            }
+        }
+        public static void SetUserConfig(DiscordUserConfig config)
+        {
+            ulong id = config.UserID;
+            if (UserCache.ContainsKey(id))
+            {
+                UserCache.Remove(id);
+            }
+            UserCache.Add(id, config);
+            string userpath = UserConfigPath + config.UserID.ToString() + ".json";
+            File.WriteAllText(userpath, JsonConvert.SerializeObject(config));
+        }
+        public void DeleteUserConfig(ulong id, ulong guildid)
+        {
+            if (guildid == GetBot().GetConfig().GuildID)
+            {
+                try
+                {
+                    File.Delete(UserConfigPath + id.ToString() + ".json");
+                }
+                catch (Exception ex)
+                {
+                    Log.WriteError("Failed to delete banned user's config data! Error: \n " + ex.ToString());
+                }
+            }
+        }
+        public static void RefreshAllSavedUsers()
+        {
+            Log.WriteInfo("Prepping to Enumrate all discord config saves... Total Saves: " + Directory.EnumerateFiles(UserConfigPath).ToList().Count);
+            uint counter = 0;
+            foreach (string file in Directory.EnumerateFiles(UserConfigPath))
+            {
+                DiscordUserConfig config = JsonConvert.DeserializeObject<DiscordUserConfig>(File.ReadAllText(file));
+                foreach (uint level in LevelRoles.RoleLevels.Keys)
+                {
+                    foreach (RoleLevel role in LevelRoles.RoleLevels[level])
+                    {
+                        if (config.XPLevel < level)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            if (role.Action == RoleLevelActions.REMOVE)
+                            {
+                                SocketGuild guild = Bot.Instance.GetClient().GetGuild(Bot.Instance.GetConfig().GuildID);
+                                SocketGuildUser user = guild.GetUser(config.UserID);
+                                SocketRole grole = guild.GetRole(role.RoleID);
+                                if (user != null && user.Roles.Contains(grole))
+                                {
+                                    user.RemoveRoleAsync(grole);
+                                }
+                            }
+                            else if (role.Action == RoleLevelActions.ADD)
+                            {
+                                SocketGuild guild = Bot.Instance.GetClient().GetGuild(Bot.Instance.GetConfig().GuildID);
+                                SocketGuildUser user = guild.GetUser(config.UserID);
+                                SocketRole grole = guild.GetRole(role.RoleID);
+                                if (user != null && grole != null && !user.Roles.Contains(grole))
+                                {
+                                    user.AddRoleAsync(grole);
+                                }
+                            }
+                        }
+                    }
+                }
+                counter++;
+                Log.WriteInfo($"Finished Parsing {counter} out of {Directory.EnumerateFiles(UserConfigPath).ToList().Count} user config files");
+            }
+        }
+        private static bool CheckMessage(string message, ulong userid)
+        {
+            switch (DiscordConfig.XPRequirementStrictness)
+            {
+                case 0:
+                    return true;
+                case 1:
+                    if (message.Length >= DiscordConfig.MinMessageLength)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                case 2:
+                    if (message.Length <= DiscordConfig.MinMessageLength)
+                    {
+                        return false;
+                    }
+                    if (LastMessageCache.ContainsKey(userid) && LastMessageCache[userid] == message)
+                    {
+                        return false;
+                    }
+                    if (!message.Contains(' '))
+                    {
+                        return false;
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        }
+        private static void GenerateServerConfig()
+        {
+            DiscordConfig config = new(true, 1);
+            string json = JsonConvert.SerializeObject(config);
+            File.WriteAllText(ServerConfigPath + "config.json", json);
+            DiscordConfig = config;
+        }
+        public static float GetXPPerLevel(uint level)
+        {
+            float result = ((level * level) + DiscordConfig.XPOffsetToAdd) * DiscordConfig.XPPerLevelMultiplier;
+            return result;
+        }
+        public static uint GetLevelPerXP(float xp)
+        {
+            float result = ((xp / xp) - DiscordConfig.XPOffsetToAdd) / DiscordConfig.XPPerLevelMultiplier;
+            return (uint)Math.Round((double)result, MidpointRounding.ToZero);
+        }
+        private static void WriteConfig()
+        {
+            if(File.Exists(ServerConfigPath + "role_levels.json"))
+            {
+                File.Delete(ServerConfigPath + "role_levels.json");
+                string json = JsonConvert.SerializeObject(LevelRoles);
+                File.WriteAllText(ServerConfigPath + "role_levels.json", json);
+            }
+            else
+            {
+                string json = JsonConvert.SerializeObject(LevelRoles);
+                File.WriteAllText(ServerConfigPath + "role_levels.json", json);
+            }
+        }
+
+        #endregion
     }
+
+    //Structs
+
+    #region Discord Config / User config
+    public struct DiscordUserConfig
+    {
+        public ulong UserID;
+        public uint XPLevel;
+        public float XP;
+        public bool LockXP;
+        public DiscordUserConfig(ulong UserID, uint XPLevel = 0, float XP = 0f, bool LockXP = false)
+        {
+            this.UserID = UserID;
+            this.XPLevel = XPLevel;
+            this.XP = XP;
+            this.LockXP = LockXP;
+        }
+    }
+
+    public struct DiscordConfig
+    {
+        public bool XPEnabled;
+        public float XPPerLevelMultiplier;
+        //mapping is level, xp amount
+        public Dictionary<uint, float> XPLevels;
+        public float MaxXPPerMessage;
+        public float MinXPPerMessage;
+        public float XPEarnChance;
+        public float XPMultiplier;
+        public uint MinMessageLength;
+        public uint XPOffsetToAdd;
+        public short XPRequirementStrictness;
+        public DiscordConfig(bool XPEnabled = true, float XPPerLevelMultiplier = 1, float MaxXPPerMessage = 7, float MinXPPerMessage = 2, float XPEarnChance = 20, uint MinMessageLength = 10, uint XPOffsetToAdd = 50, float XPMuliplier = 1, short XPRequirementStrictness = 1)
+        {
+            this.XPEnabled = XPEnabled;
+            this.XPPerLevelMultiplier = XPPerLevelMultiplier;
+            XPLevels = new();
+            XPMultiplier = XPMuliplier;
+            this.MinMessageLength = MinMessageLength;
+            this.MaxXPPerMessage = MaxXPPerMessage;
+            this.XPEarnChance = XPEarnChance;
+            this.MinXPPerMessage = MinXPPerMessage;
+            this.XPOffsetToAdd = XPOffsetToAdd;
+            this.XPRequirementStrictness = XPRequirementStrictness;
+        }
+    }
+    #endregion
+
+    #region Level Roles
+    public struct LevelRoles
+    {
+        public bool Enable;
+        public Dictionary<uint, List<RoleLevel>> RoleLevels;
+        public LevelRoles(Dictionary<uint, List<RoleLevel>> RoleLevels, bool Enable = true)
+        {
+            this.RoleLevels = RoleLevels;
+            this.Enable = Enable;
+        }
+    }
+    public struct RoleLevel
+    {
+        public ulong RoleID;
+        public RoleLevelActions Action;
+        public RoleLevel(ulong RoleID, RoleLevelActions Action)
+        {
+            this.RoleID = RoleID;
+            this.Action = Action;
+        }
+    }
+
+    public enum RoleLevelActions
+    {
+        ADD,
+        REMOVE,
+    }
+    #endregion
 }

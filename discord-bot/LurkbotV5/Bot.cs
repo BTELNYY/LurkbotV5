@@ -33,6 +33,19 @@ namespace LurkbotV5
             }
         }
 
+        public DiscordManager GetDiscordManager()
+        {
+            if(DiscordManager == null)
+            {
+                Log.WriteFatal("DiscordManager is null!");
+                return new DiscordManager(GetClient());
+            }
+            else
+            {
+                return DiscordManager;
+            }
+        }
+
         public DiscordSocketClient GetClient()
         {
             if(Client == null) 
@@ -96,7 +109,7 @@ namespace LurkbotV5
                 return;
             }
             DiscordManager.EventInit();
-            DiscordManager.BuildInit();
+            DiscordManager.DiscordConfigInit();
             DiscordManager.CommandInit();
             DiscordManager.RepeatTaskInit();
         }
