@@ -25,6 +25,11 @@ namespace LurkbotV5
             Client = client;
         }
 
+        public void SetBotStatus(string message)
+        {
+            GetBot().GetClient().SetActivityAsync(new Game(message));
+        }
+
         public Task OnGhostPinging(Cacheable<IMessage, ulong> msg, Cacheable<IMessageChannel, ulong> channel)
         {
             Log.WriteDebug("OnGhostPing event triggered");
@@ -223,6 +228,7 @@ namespace LurkbotV5
                 }
                 await mestoEdituser.ModifyAsync(properties => { properties.Embeds = embeds.ToArray(); });
             }
+            SetBotStatus("with " + response.value[0].Servers[0].PlayersList.ToString() + "players! See server-status for more!");
         }
 
         public void SetBot(Bot bot)
