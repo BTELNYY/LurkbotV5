@@ -7,6 +7,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use time::ext::NumericalDuration;
+use serde_with::{serde_as, DurationSeconds};
 
 pub fn wrap_to_u64(x: i64) -> u64 {
     (x as u64).wrapping_add(u64::MAX / 2 + 1)
@@ -19,6 +20,7 @@ pub fn wrap_to_i64(x: u64) -> i64 {
 pub struct Flag {
     pub flag: i64,
     pub issuer: String,
+    #[serde(with = "time::serde::rfc3339")]
     pub issued_at: time::OffsetDateTime,
     pub comment: String,
 }
@@ -35,7 +37,6 @@ pub struct DbRow {
     pub login_amt: i64,
 }
 
-use serde_with::{serde_as, DurationSeconds};
 #[serde_as]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DBPlayer {
