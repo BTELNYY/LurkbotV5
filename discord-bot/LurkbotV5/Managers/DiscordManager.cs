@@ -228,7 +228,7 @@ namespace LurkbotV5
                 }
                 await mestoEdituser.ModifyAsync(properties => { properties.Embeds = embeds.ToArray(); });
             }
-            SetBotStatus("with " + response.value[0].Servers[0].PlayersList.ToString() + "players! See server-status for more!");
+            SetBotStatus("with " + response.value[0].Servers[0].PlayersList.Length.ToString() + " players! See server-status for more!");
         }
 
         public void SetBot(Bot bot)
