@@ -30,8 +30,8 @@ namespace LurkbotV5
             APIManager.Init();
             Bot bot = new(config, client, discordManager);
             discordManager.SetBot(bot);
-            TranslationManager.Init();
             bot.StartBot();
+            TranslationManager.Init();
             await Task.Delay(-1);
         }
     }
