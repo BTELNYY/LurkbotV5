@@ -39,6 +39,13 @@ namespace LurkbotV5.Managers
 
     public struct Translations
     {
+        //generic
+        public string Yes = "Yes";
+        public string No = "No";
+        public string Success = "Success";
+        public string Error = "Error";
+        public string Warning = "Warning";
+        //playerdata
         public string PlayerCount = "Player Count";
         public string PlayerDetails = "Player Details: ";
         public string SteamID = "SteamID";
@@ -48,14 +55,17 @@ namespace LurkbotV5.Managers
         public string PlayTime = "Playtime";
         public string Logins = "Logins";
         public string TimeOnline = "Time Online";
-        public string RankData = "Rank Data: ";
+        public string Flags = "Flags";
         //what the levels are reffered to in UI
         //level specific
+        public string RankData = "Rank Data: ";
         public string LevelName = "Access Tier";
         public string XPRequiredXP = "XP/RequiredXP";
         public string XPLocked = "XP Locked";
         //userpfp
         public string HasGuildPFP = "Has Guild PFP";
+        public string GuildPFPURL = "Guild PFP URL";
+        public string PFPURL = "PFP URL";
 
         public Translations()
         {
