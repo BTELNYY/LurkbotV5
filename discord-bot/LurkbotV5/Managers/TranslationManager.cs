@@ -58,6 +58,7 @@ namespace LurkbotV5.Managers
         public string Logins = "Logins";
         public string TimeOnline = "Time Online";
         public string Flags = "Flags";
+        public string PlaytimeLeaderboard = "Playtime Leaderboard";
         //what the levels are reffered to in UI
         //level specific
         public string RankData = "Rank Data: ";

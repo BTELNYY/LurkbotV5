@@ -109,7 +109,6 @@ namespace LurkbotV5.Managers
             }
         }
 
-
         public static NWAllResponse GetServerStatus(string token)
         {
             try
@@ -120,7 +119,7 @@ namespace LurkbotV5.Managers
 
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                Log.WriteDebug(url + requrl);
+                Log.WriteDebug("GET: " +url + requrl);
                 var response = client.GetStringAsync(url + requrl);
                 response.Wait();
                 string result = response.Result;
@@ -139,6 +138,37 @@ namespace LurkbotV5.Managers
             {
                 Log.WriteError(ex.ToString());
                 return new NWAllResponse();
+            }
+        }
+
+        public static PlayerStats[] GetPlaytimeLeaderboard()
+        {
+            try
+            {
+                string url = CurrentURL;
+                string html = string.Empty;
+                string requrl = "/query/leaderboard/";
+                var client = new HttpClient();
+                Log.WriteDebug("GET: " + url + requrl);
+                var response = client.GetStringAsync(url + requrl);
+                response.Wait();
+                string result = response.Result;
+                Log.WriteDebug(result);
+                PlayerStats[]? list = JsonConvert.DeserializeObject<PlayerStats[]>(result);
+                if(list == null)
+                {
+                    Log.WriteWarning("List is null!");
+                    return new PlayerStats[0];
+                }
+                else
+                {
+                    return list;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.WriteError(ex.ToString());
+                return new PlayerStats[0];
             }
         }
     }
