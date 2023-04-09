@@ -23,7 +23,7 @@ namespace LurkbotV5.Commands
                 EmbedBuilder eb = new();
                 eb.WithColor(Color.Blue);
                 eb.WithTitle(TranslationManager.GetTranslations().PlaytimeLeaderboard);
-                string description = "``` (PLACE): (USERNAME), (PLAYTIME)";
+                string description = "``` (PLACE): (USERNAME), (PLAYTIME) \n";
                 int counter = 0;
                 foreach (var player in players)
                 {
@@ -33,6 +33,7 @@ namespace LurkbotV5.Commands
                                     t.Minutes,
                                     t.Seconds);
                     description += $"{counter}: {player.LastNickname}, {answer} \n";
+                    counter++;
                 }
                 description += "```";
                 eb.WithCurrentTimestamp();

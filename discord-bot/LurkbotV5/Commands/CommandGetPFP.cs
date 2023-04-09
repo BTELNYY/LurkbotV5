@@ -34,7 +34,7 @@ namespace LurkbotV5.Commands
             string url = "";
             bool HasGuildPfp = false;
             
-            if(user.GetGuildAvatarUrl(size: 512) != user.GetAvatarUrl(size: 512))
+            if(user.GetGuildAvatarUrl(size: 512) != null)
             {
                 HasGuildPfp = true;
             }
