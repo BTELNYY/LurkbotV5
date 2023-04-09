@@ -3,6 +3,15 @@
 version = 3
 
 [[package]]
+name = "BCF"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "codespan-reporting",
+ "indoc",
+]
+
+[[package]]
 name = "ahash"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -973,6 +982,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "indoc"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f2cb48b81b1dc9f39676bf99f5499babfec7cd8fe14307f7b3d747208fb5690"
+
+[[package]]
 name = "inlinable_string"
 version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1105,6 +1120,7 @@ dependencies = [
 name = "lurky"
 version = "0.1.0"
 dependencies = [
+ "BCF",
  "anyhow",
  "async-trait",
  "parking_lot 0.12.1",
