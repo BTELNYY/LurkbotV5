@@ -1,5 +1,5 @@
 [workspace]
-members = ["backend", "migrate", "lurky"]
+members = ["backend", "migrate", "lurky", "BCF"]
 
 [profile.dev.package."*"]
 # Set the default for dependencies in Development mode.

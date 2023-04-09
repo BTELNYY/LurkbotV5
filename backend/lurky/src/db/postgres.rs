@@ -12,10 +12,8 @@ pub struct PostgresDB {
 }
 
 impl PostgresDB {
-    pub fn new(config: &crate::config::Config) -> Result<Self, anyhow::Error> {
-        let db_url = config
-            .get::<String>("db_url")
-            .ok_or(anyhow!("No db_url present in config file!"))?;
+    pub fn new(config: &crate::config::LurkyConfig) -> Result<Self, anyhow::Error> {
+        let db_url = config.db_url.clone();
         Ok(PostgresDB { pool: None, db_url })
     }
     pub fn is_connected(&self) -> bool {

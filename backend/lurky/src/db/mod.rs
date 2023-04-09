@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 pub mod mem;
 pub mod postgres;
-use crate::{config::Config, query::Restriction};
+use crate::{config::LurkyConfig, query::Restriction};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -105,13 +105,10 @@ pub trait DB: Send + Sync + Debug {
     ) -> Result<DBPlayer, anyhow::Error>;
 }
 
-pub fn create_db_from_config(config: &Config) -> Result<ManagedDB> {
-    match config.get::<String>("db_type") {
-        Some(db_type) => match db_type.as_str() {
-            "postgres" => Ok(Box::new(postgres::PostgresDB::new(config)?)),
-            "memory" => Ok(Box::new(mem::MemoryDB::new())),
-            _ => Err(anyhow!("Unknown DB type: {}", db_type)),
-        },
-        None => Err(anyhow!("No DB type present in config file!")),
+pub fn create_db_from_config(config: &LurkyConfig) -> Result<ManagedDB> {
+    match config.db_type.as_str() {
+        "postgres" => Ok(Box::new(postgres::PostgresDB::new(config)?)),
+        "memory" => Ok(Box::new(mem::MemoryDB::new())),
+        _ => Err(anyhow!("Unknown DB type: {}", config.db_type)),
     }
 }

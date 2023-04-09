@@ -2,7 +2,7 @@ use rocket::request::{self, FromRequest, Outcome, Request};
 //use rocket::State;
 use std::sync::Arc;
 
-use lurky::config::Config;
+use lurky::config::LurkyConfig;
 
 pub mod basics;
 pub mod northwood;
@@ -16,12 +16,10 @@ impl<'r> FromRequest<'r> for Authenticated {
     async fn from_request(req: &'r Request<'_>) -> request::Outcome<Self, Self::Error> {
         let conf = req
             .rocket()
-            .state::<Arc<Config>>()
+            .state::<Arc<LurkyConfig>>()
             .expect("The config to be present??");
         let key = req.headers().get_one("Authorization");
-        let valid_key: Result<String, _> = conf
-            .get("auth_key")
-            .ok_or(anyhow::anyhow!("No key present in config file!"));
+        let valid_key: Result<String, _> = Ok(conf.auth_key.clone()); // TODO: fix pls
         match valid_key {
             Ok(valid_key) => match key {
                 Some(passed_key) => {
