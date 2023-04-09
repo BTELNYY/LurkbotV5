@@ -5,9 +5,9 @@ use crate::{config::LurkyConfig, query::Restriction};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use serde_with::{serde_as, DurationSeconds};
 use sqlx::FromRow;
 use time::ext::NumericalDuration;
-use serde_with::{serde_as, DurationSeconds};
 
 pub fn wrap_to_u64(x: i64) -> u64 {
     (x as u64).wrapping_add(u64::MAX / 2 + 1)

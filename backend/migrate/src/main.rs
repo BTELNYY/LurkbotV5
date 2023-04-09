@@ -2,9 +2,7 @@ use clap::Parser;
 use indicatif::ParallelProgressIterator;
 use lurky::config::LurkyConfig;
 use lurky::db;
-use lurky::{
-    db::{DBPlayer, DB},
-};
+use lurky::db::{DBPlayer, DB};
 use rayon::prelude::*;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::{

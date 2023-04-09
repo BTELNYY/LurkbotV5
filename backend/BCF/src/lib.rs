@@ -1,11 +1,20 @@
-use std::{collections::HashMap, error::Error, ops::{RangeBounds, Range}, io::{Read, BufReader, BufRead}, str::FromStr, process::exit, hash::Hash, fmt::Debug};
+use std::{
+    collections::HashMap,
+    error::Error,
+    fmt::Debug,
+    hash::Hash,
+    io::{BufRead, BufReader, Read},
+    ops::{Range, RangeBounds},
+    process::exit,
+    str::FromStr,
+};
 
 // Btelnyy config format!!
 #[derive(Debug, Clone)]
 pub struct RawConfig {
     data: HashMap<String, String>,
     full: String,
-    offsets: HashMap<String, usize>
+    offsets: HashMap<String, usize>,
 }
 
 use anyhow::{anyhow, Context};
@@ -36,48 +45,50 @@ impl RawConfig {
             offset += read;
         }
 
-        Ok(RawConfig { data, full: raw, offsets })
+        Ok(RawConfig {
+            data,
+            full: raw,
+            offsets,
+        })
     }
     pub fn get<T: BCFValue>(&self, key: &str) -> BCFParseResult<T> {
-        self.data.get(key)
-        .ok_or_else(|| {
-            BCFParseError {
+        self.data
+            .get(key)
+            .ok_or_else(|| BCFParseError {
                 error: anyhow!("Missing key {}", key),
-                span: 0..0
-            }
-        })
-        .and_then(|s| {
-            T::parse_bcf(s)
-        })
+                span: 0..0,
+            })
+            .and_then(|s| T::parse_bcf(s))
     }
-} 
+}
 #[derive(Debug)]
 pub struct BCFParseError {
     pub span: Range<usize>,
-    pub error: anyhow::Error
+    pub error: anyhow::Error,
 }
 
 pub type BCFParseResult<T> = Result<T, BCFParseError>;
 
-pub trait BCFValue where Self: Sized {
+pub trait BCFValue
+where
+    Self: Sized,
+{
     fn parse_bcf(value: &str) -> BCFParseResult<Self>;
 }
 
 impl BCFValue for u64 {
     fn parse_bcf(value: &str) -> BCFParseResult<Self> {
-        value.parse().map_err(|err| {
-            BCFParseError { span: 
-                0..value.len(), error: anyhow::Error::new(err) 
-            }
+        value.parse().map_err(|err| BCFParseError {
+            span: 0..value.len(),
+            error: anyhow::Error::new(err),
         })
     }
 }
 impl BCFValue for u16 {
     fn parse_bcf(value: &str) -> BCFParseResult<Self> {
-        value.parse().map_err(|err| {
-            BCFParseError { span: 
-                0..value.len(), error: anyhow::Error::new(err) 
-            }
+        value.parse().map_err(|err| BCFParseError {
+            span: 0..value.len(),
+            error: anyhow::Error::new(err),
         })
     }
 }
@@ -94,13 +105,13 @@ fn tokenize(string: &str, sep: char) -> Vec<(String, usize)> {
                 tokens.push((token, escapes_hit));
                 escapes_hit = 0;
                 token = String::new();
-            },
+            }
             ESCAPE => {
                 if let Some(next) = chars.next() {
                     escapes_hit += 1;
                     token.push(next);
                 }
-            },
+            }
             _ => token.push(ch),
         }
     }
@@ -116,20 +127,20 @@ impl<T: BCFValue> BCFValue for Vec<T> {
         for (val, escapes_hit) in vals {
             //println!("{:?}, {}", val, escapes_hit);
             let full_len = val.len() + escapes_hit;
-            
+
             let value = T::parse_bcf(&val);
             match value {
                 Ok(v) => resulting.push(v),
                 Err(e) => {
                     let new = BCFParseError {
-                        span: e.span.start+offset..e.span.end+offset+escapes_hit,
+                        span: e.span.start + offset..e.span.end + offset + escapes_hit,
                         ..e
                     };
-                    return Err(new)
+                    return Err(new);
                 }
             }
             offset += full_len + 1;
-        }        
+        }
         Ok(resulting)
     }
 }
@@ -144,9 +155,9 @@ impl<K: Hash + Eq + BCFValue, V: BCFValue> BCFValue for HashMap<K, V> {
             //println!("{:?}", val);
             if val.len() != 2 {
                 return Err(BCFParseError {
-                    span: offset..offset+pval.len(),
-                    error: anyhow!("Invalid key value pair")
-                })
+                    span: offset..offset + pval.len(),
+                    error: anyhow!("Invalid key value pair"),
+                });
             }
             let (key, key_escapes) = val[0].clone();
             let (value, value_escapes) = val[1].clone();
@@ -156,24 +167,27 @@ impl<K: Hash + Eq + BCFValue, V: BCFValue> BCFValue for HashMap<K, V> {
             let value = V::parse_bcf(&value);
             //println!("{:?}, {:?}, {:?}, {:?}", key, value, key_escapes, value_escapes);
             match (key, value) {
-                (Ok(k), Ok(v)) => {resulting.insert(k, v);},
+                (Ok(k), Ok(v)) => {
+                    resulting.insert(k, v);
+                }
                 (Err(e), _) => {
                     let new = BCFParseError {
-                        span: e.span.start+offset+1..e.span.end+offset+key_escapes+1,
+                        span: e.span.start + offset + 1..e.span.end + offset + key_escapes + 1,
                         ..e
                     };
-                    return Err(new)
-                },
+                    return Err(new);
+                }
                 (_, Err(e)) => {
                     let new = BCFParseError {
-                        span: e.span.start+offset+key_len+key_escapes+2..e.span.end+offset+key_len+key_escapes+2+value_escapes,
+                        span: e.span.start + offset + key_len + key_escapes + 2
+                            ..e.span.end + offset + key_len + key_escapes + 2 + value_escapes,
                         ..e
                     };
-                    return Err(new)
+                    return Err(new);
                 }
             }
             offset += full_len + 1;
-        }        
+        }
         Ok(resulting)
     }
 }
@@ -184,9 +198,12 @@ impl BCFValue for String {
     }
 }
 
-use codespan_reporting::{diagnostic::{Diagnostic, Label}, term};
 use codespan_reporting::files::SimpleFiles;
 use codespan_reporting::term::termcolor::{ColorChoice, StandardStream};
+use codespan_reporting::{
+    diagnostic::{Diagnostic, Label},
+    term,
+};
 
 pub fn bcf_parse_into<T: BCFValue>(conf: &RawConfig, key: &str) -> T {
     match conf.get::<T>(key) {
@@ -198,22 +215,22 @@ pub fn bcf_parse_into<T: BCFValue>(conf: &RawConfig, key: &str) -> T {
             let mut files = SimpleFiles::new();
             let conf_file = files.add("config", conf.full.clone());
             let err_message = format!("{:?}", e.error);
-            let err_span = e.span.start+offset+key.len()+1..e.span.end+offset+key.len()+1;
+            let err_span =
+                e.span.start + offset + key.len() + 1..e.span.end + offset + key.len() + 1;
             let diag = Diagnostic::error()
                 .with_message(err_message.clone())
-            .with_code("ERROR")
-            .with_labels(vec![
-                Label::primary(conf_file, err_span).with_message(err_message)
-            ]);
+                .with_code("ERROR")
+                .with_labels(vec![
+                    Label::primary(conf_file, err_span).with_message(err_message)
+                ]);
             let writer = StandardStream::stderr(ColorChoice::Always);
             let config = codespan_reporting::term::Config::default();
-                
+
             term::emit(&mut writer.lock(), &config, &files, &diag).unwrap();
             exit(1)
         }
     }
-}       
-
+}
 
 #[cfg(test)]
 mod tests {
@@ -227,7 +244,7 @@ mod tests {
         banned_mfs: Vec<u64>,
         escape_test: Vec<String>,
         test_map: HashMap<String, String>,
-        test_map_two: HashMap<u64, u64>
+        test_map_two: HashMap<u64, u64>,
     }
 
     impl TestConfig {
@@ -238,7 +255,7 @@ mod tests {
                 banned_mfs: bcf_parse_into(&conf, "banned_mfs"),
                 escape_test: bcf_parse_into(&conf, "escape_test"),
                 test_map: bcf_parse_into(&conf, "test_map"),
-                test_map_two: bcf_parse_into(&conf, "test_map_two")
+                test_map_two: bcf_parse_into(&conf, "test_map_two"),
             }
         }
     }
@@ -259,10 +276,22 @@ mod tests {
         assert_eq!(dt.val1, 65535);
         assert_eq!(dt.val2, 1234);
         assert_eq!(dt.banned_mfs, vec![6969, 420, 5923]);
-        assert_eq!(dt.escape_test, vec!["hello, world".to_string(), "hey!".to_string()]);
-        assert_eq!(dt.test_map, HashMap::from_iter(vec![("hello".to_string(), "world".to_string()), ("hey".to_string(), "there".to_string()), ("test_escape".to_string(), "test,ok!|ok!".to_string())]));
-        assert_eq!(dt.test_map_two, HashMap::from_iter(vec![(567, 123), (123, 567)]));
+        assert_eq!(
+            dt.escape_test,
+            vec!["hello, world".to_string(), "hey!".to_string()]
+        );
+        assert_eq!(
+            dt.test_map,
+            HashMap::from_iter(vec![
+                ("hello".to_string(), "world".to_string()),
+                ("hey".to_string(), "there".to_string()),
+                ("test_escape".to_string(), "test,ok!|ok!".to_string())
+            ])
+        );
+        assert_eq!(
+            dt.test_map_two,
+            HashMap::from_iter(vec![(567, 123), (123, 567)])
+        );
         println!("{:#?}", dt);
     }
-    
 }

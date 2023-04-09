@@ -93,6 +93,6 @@ impl DB for MemoryDB {
     async fn leaderboard(&self, limit: u64) -> Result<Vec<DBPlayer>, anyhow::Error> {
         let mut players = self.data.read().clone();
         players.sort_by(|a, b| b.play_time.cmp(&a.play_time));
-        Ok(players.into_iter().take(limit as usize).collect())  
+        Ok(players.into_iter().take(limit as usize).collect())
     }
 }

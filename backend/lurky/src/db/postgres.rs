@@ -155,7 +155,7 @@ impl DB for PostgresDB {
             let result = sqlx::query_as!(
                 DbRow,
                 r#"select * from lurkies order by play_time desc limit $1"#,
-                limit as i64 
+                limit as i64
             )
             .fetch_all(db)
             .await?;

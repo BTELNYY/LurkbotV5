@@ -4,7 +4,10 @@ use crate::{
 };
 use futures::future::join_all;
 use lazy_static::lazy_static;
-use lurky::{db::{DBPlayer, ManagedDB}, config::LurkyConfig};
+use lurky::{
+    config::LurkyConfig,
+    db::{DBPlayer, ManagedDB},
+};
 use parking_lot::RwLock;
 use std::{hash::Hasher, sync::Arc, time::Duration};
 lazy_static! {
@@ -16,7 +19,9 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
     let refresh = conf.refresh_cooldown;
     println!("Backend: Refresh cooldown: {}", refresh);
     println!("Parsing servers...");
-    let servers = conf.servers.iter()
+    let servers = conf
+        .servers
+        .iter()
         .map(|s| SlServer::parse(s))
         .collect::<Vec<SlServer>>();
     println!("Parsed {} servers", servers.len());

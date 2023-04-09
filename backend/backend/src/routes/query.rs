@@ -208,7 +208,12 @@ pub async fn leaderboard(db: &State<Arc<ManagedDB>>) -> DBResult<Vec<DBPlayer>> 
 }
 
 pub fn routes() -> Vec<Route> {
-    routes![index, query_by_id, query_by_name, query_db, query_db_random, leaderboard]
+    routes![
+        index,
+        query_by_id,
+        query_by_name,
+        query_db,
+        query_db_random,
+        leaderboard
+    ]
 }
-
-
