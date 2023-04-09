@@ -21,6 +21,7 @@ services:
     volumes:
       - ./config.txt:/app/config.txt
       - ./statistics:/app/statistics/
+      - ./translations:/app/translations/
       - ./logs:/app/logs/
     environment:
       - RUNNING_IN_DOCKER=true
