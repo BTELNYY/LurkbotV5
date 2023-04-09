@@ -103,6 +103,7 @@ pub trait DB: Send + Sync + Debug {
         &self,
         restriction: &Restriction,
     ) -> Result<DBPlayer, anyhow::Error>;
+    async fn leaderboard(&self, limit: u64) -> Result<Vec<DBPlayer>, anyhow::Error>;
 }
 
 pub fn create_db_from_config(config: &LurkyConfig) -> Result<ManagedDB> {

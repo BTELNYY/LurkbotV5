@@ -196,6 +196,19 @@ pub async fn query_db_random(
     }
 }
 
-pub fn routes() -> Vec<Route> {
-    routes![index, query_by_id, query_by_name, query_db, query_db_random]
+#[get("/leaderboard")]
+pub async fn leaderboard(db: &State<Arc<ManagedDB>>) -> DBResult<Vec<DBPlayer>> {
+    let player = db.leaderboard(20).await;
+    match player {
+        Ok(p) => Ok(Json(p)),
+        Err(error) => Err(NotFound(Json(DBError {
+            err: format!("{}", error),
+        }))),
+    }
 }
+
+pub fn routes() -> Vec<Route> {
+    routes![index, query_by_id, query_by_name, query_db, query_db_random, leaderboard]
+}
+
+
