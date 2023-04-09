@@ -42,9 +42,14 @@ namespace LurkbotV5.Commands
             eb.Title = user.Username + " (" + id + ")";
             eb.AddField(TranslationManager.GetTranslations().HasGuildPFP + "?", HasGuildPfp.ToString());
             eb.ImageUrl = user.GetAvatarUrl(size: 512);
+            url = user.GetAvatarUrl();
+            string guildurl = user.GetGuildAvatarUrl();
+            eb.AddField(TranslationManager.GetTranslations().PFPURL, url);
+            if(HasGuildPfp)
+            {
+                eb.AddField(TranslationManager.GetTranslations().GuildPFPURL, guildurl);
+            }
             eb.WithCurrentTimestamp();
-            eb.AddField(TranslationManager.GetTranslations().PFPURL, user.GetAvatarUrl(size: 512));
-            eb.AddField(TranslationManager.GetTranslations().GuildPFPURL, user.GetGuildAvatarUrl(size: 512));
             Embed embed = eb.Build();
             command.RespondAsync(embed:embed);
         }

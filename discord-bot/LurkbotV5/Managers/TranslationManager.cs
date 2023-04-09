@@ -21,10 +21,12 @@ namespace LurkbotV5.Managers
             Log.WriteInfo("Starting translations system!");
             if(File.Exists(Path + Bot.Instance.GetConfig().TranslationName + ".json"))
             {
+                Log.WriteInfo("File exists, loading.");
                 Translations = JsonConvert.DeserializeObject<Translations>(File.ReadAllText(Path + Bot.Instance.GetConfig().TranslationName + ".json"));
             }
             else
             {
+                Log.WriteWarning("Unable to find translations file, creating new based on default values (en-us)!");
                 Translations = new Translations();
                 string json = JsonConvert.SerializeObject(Translations, Formatting.Indented);
                 File.WriteAllText(Path + Bot.Instance.GetConfig().TranslationName + ".json", json);
