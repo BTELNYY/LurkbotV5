@@ -24,7 +24,7 @@ namespace LurkbotV5.Commands
                 eb.WithColor(Color.Blue);
                 eb.WithTitle(TranslationManager.GetTranslations().PlaytimeLeaderboard);
                 string description = "``` (PLACE): (USERNAME), (PLAYTIME) \n";
-                int counter = 0;
+                int counter = 1;
                 foreach (var player in players)
                 {
                     TimeSpan t = TimeSpan.FromSeconds(player.PlayTime);
