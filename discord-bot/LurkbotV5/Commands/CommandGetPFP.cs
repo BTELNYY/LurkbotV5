@@ -49,7 +49,7 @@ namespace LurkbotV5.Commands
             {
                 if(guildurl == string.Empty || guildurl == null)
                 {
-                    Log.WriteWarning("Guild URL is NULL!")
+                    Log.WriteWarning("Guild URL is NULL!");
                 }
                 eb.AddField(TranslationManager.GetTranslations().GuildPFPURL, guildurl);
             }
