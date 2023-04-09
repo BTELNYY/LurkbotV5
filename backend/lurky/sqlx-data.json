@@ -205,5 +205,73 @@
       }
     },
     "query": "select id from lurkies where id = $1"
+  },
+  "f5c294c1348664d196bc152dae7ca9c87df20e79364cc1c10b5a48d072a6ee14": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "first_seen",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "last_seen",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "play_time",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "last_nickname",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "nicknames",
+          "ordinal": 5,
+          "type_info": "VarcharArray"
+        },
+        {
+          "name": "flags",
+          "ordinal": 6,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "time_online",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "login_amt",
+          "ordinal": 8,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "select * from lurkies order by play_time desc limit $1"
   }
 }

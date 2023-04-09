@@ -4,8 +4,10 @@ use crate::{
 };
 use futures::future::join_all;
 use lazy_static::lazy_static;
-use lurky::config::Config;
-use lurky::db::{DBPlayer, ManagedDB};
+use lurky::{
+    config::LurkyConfig,
+    db::{DBPlayer, ManagedDB},
+};
 use parking_lot::RwLock;
 use std::{hash::Hasher, sync::Arc, time::Duration};
 lazy_static! {
@@ -13,13 +15,13 @@ lazy_static! {
 }
 
 /// this function runs in a seperate thread, it really shouldnt return
-pub async fn backend(conf: Arc<Config>, db: Arc<ManagedDB>) {
-    let refresh = conf.get::<u64>("refresh_cooldown").unwrap_or(60);
+pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
+    let refresh = conf.refresh_cooldown;
     println!("Backend: Refresh cooldown: {}", refresh);
     println!("Parsing servers...");
-    let servers: String = conf.get("servers").expect("No servers defined");
-    let servers = servers
-        .split(',')
+    let servers = conf
+        .servers
+        .iter()
         .map(|s| SlServer::parse(s))
         .collect::<Vec<SlServer>>();
     println!("Parsed {} servers", servers.len());

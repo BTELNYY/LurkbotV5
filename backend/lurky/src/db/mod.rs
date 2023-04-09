@@ -1,13 +1,13 @@
 use std::fmt::Debug;
 pub mod mem;
 pub mod postgres;
-use crate::{config::Config, query::Restriction};
+use crate::{config::LurkyConfig, query::Restriction};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use serde_with::{serde_as, DurationSeconds};
 use sqlx::FromRow;
 use time::ext::NumericalDuration;
-use serde_with::{serde_as, DurationSeconds};
 
 pub fn wrap_to_u64(x: i64) -> u64 {
     (x as u64).wrapping_add(u64::MAX / 2 + 1)
@@ -103,15 +103,13 @@ pub trait DB: Send + Sync + Debug {
         &self,
         restriction: &Restriction,
     ) -> Result<DBPlayer, anyhow::Error>;
+    async fn leaderboard(&self, limit: u64) -> Result<Vec<DBPlayer>, anyhow::Error>;
 }
 
-pub fn create_db_from_config(config: &Config) -> Result<ManagedDB> {
-    match config.get::<String>("db_type") {
-        Some(db_type) => match db_type.as_str() {
-            "postgres" => Ok(Box::new(postgres::PostgresDB::new(config)?)),
-            "memory" => Ok(Box::new(mem::MemoryDB::new())),
-            _ => Err(anyhow!("Unknown DB type: {}", db_type)),
-        },
-        None => Err(anyhow!("No DB type present in config file!")),
+pub fn create_db_from_config(config: &LurkyConfig) -> Result<ManagedDB> {
+    match config.db_type.as_str() {
+        "postgres" => Ok(Box::new(postgres::PostgresDB::new(config)?)),
+        "memory" => Ok(Box::new(mem::MemoryDB::new())),
+        _ => Err(anyhow!("Unknown DB type: {}", config.db_type)),
     }
 }

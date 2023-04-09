@@ -1,10 +1,8 @@
 use clap::Parser;
 use indicatif::ParallelProgressIterator;
+use lurky::config::LurkyConfig;
 use lurky::db;
-use lurky::{
-    config::Config,
-    db::{DBPlayer, DB},
-};
+use lurky::db::{DBPlayer, DB};
 use rayon::prelude::*;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::{
@@ -114,11 +112,7 @@ async fn main() -> Result<(), anyhow::Error> {
         eprintln!("Error: {}", e);
         std::process::exit(1);
     }
-    let config = Arc::new(Config::parse(std::fs::File::open(args.config)?)?);
-    if let Err(e) = config.validate() {
-        eprintln!("Config Error: {}", e);
-        std::process::exit(1);
-    }
+    let config = Arc::new(LurkyConfig::parse_data(std::fs::File::open(args.config)?));
     println!("{:?}", config);
     let mut db = db::create_db_from_config(&config)?;
     db.setup().await?;

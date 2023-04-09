@@ -12,10 +12,8 @@ pub struct PostgresDB {
 }
 
 impl PostgresDB {
-    pub fn new(config: &crate::config::Config) -> Result<Self, anyhow::Error> {
-        let db_url = config
-            .get::<String>("db_url")
-            .ok_or(anyhow!("No db_url present in config file!"))?;
+    pub fn new(config: &crate::config::LurkyConfig) -> Result<Self, anyhow::Error> {
+        let db_url = config.db_url.clone();
         Ok(PostgresDB { pool: None, db_url })
     }
     pub fn is_connected(&self) -> bool {
@@ -148,6 +146,23 @@ impl DB for PostgresDB {
                 .fetch_one(db)
                 .await?;
             return Ok(DBPlayer::from_row(result));
+        }
+        Err(anyhow!("Not connected to database!"))
+    }
+    async fn leaderboard(&self, limit: u64) -> Result<Vec<DBPlayer>, anyhow::Error> {
+        let limit = if limit > 100 { 100 } else { limit };
+        if let Some(db) = &self.pool {
+            let result = sqlx::query_as!(
+                DbRow,
+                r#"select * from lurkies order by play_time desc limit $1"#,
+                limit as i64
+            )
+            .fetch_all(db)
+            .await?;
+            return Ok(result
+                .into_iter()
+                .map(|row| DBPlayer::from_row(row))
+                .collect());
         }
         Err(anyhow!("Not connected to database!"))
     }
