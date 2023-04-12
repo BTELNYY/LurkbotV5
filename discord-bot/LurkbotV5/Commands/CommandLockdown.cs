@@ -104,7 +104,7 @@ namespace LurkbotV5.Commands
 
         async Task DelayedLockdown(SocketTextChannel textchannel)
         {
-            await Task.Delay(30 * 1000);
+            await Task.Delay(38 * 1000);
             var perms = new OverwritePermissions();
             perms = perms.Modify(sendMessages: PermValue.Deny, sendMessagesInThreads: PermValue.Deny, createPrivateThreads: PermValue.Deny, createPublicThreads: PermValue.Deny, addReactions: PermValue.Deny);
             var role = Bot.Instance.GetClient().GetGuild(textchannel.Guild.Id).EveryoneRole;
