@@ -15,6 +15,7 @@ namespace LurkbotV5.Commands
         public override string CommandName => "lockdown";
         public override string Description => "Locks a channel down with an optional 30 second warning.";
         public override GuildPermission RequiredPermission => GuildPermission.Administrator;
+        public override bool IsDefaultEnabled => true;
 
         public async override void Execute(SocketSlashCommand command)
         { 

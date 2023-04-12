@@ -85,6 +85,7 @@ namespace LurkbotV5
             BuildCommand(new CommandRank());
             BuildCommand(new CommandDestroyAppCommands());
             BuildCommand(new CommandLeaderboard());
+            BuildCommand(new CommandLockdown());
         }
         public void RepeatTaskInit()
         {
