@@ -51,7 +51,7 @@ namespace LurkbotV5.Commands
                 if (!Configuration.ChannelLocks.ContainsKey(textchannel.Id))
                 {
                     var perms = new OverwritePermissions();
-                    perms.Modify(sendMessages: PermValue.Deny, sendMessagesInThreads: PermValue.Deny, createPrivateThreads: PermValue.Deny, createPublicThreads: PermValue.Deny, addReactions: PermValue.Deny);
+                    perms = perms.Modify(sendMessages: PermValue.Deny, sendMessagesInThreads: PermValue.Deny, createPrivateThreads: PermValue.Deny, createPublicThreads: PermValue.Deny, addReactions: PermValue.Deny);
                     var role = Bot.Instance.GetClient().GetGuild(textchannel.Guild.Id).EveryoneRole;
                     Configuration.ChannelLocks.Add(textchannel.Id, textchannel.PermissionOverwrites.ToList());
                     foreach (var thing in textchannel.PermissionOverwrites)
@@ -106,7 +106,7 @@ namespace LurkbotV5.Commands
         {
             await Task.Delay(30 * 1000);
             var perms = new OverwritePermissions();
-            perms.Modify(sendMessages: PermValue.Deny, sendMessagesInThreads: PermValue.Deny, createPrivateThreads: PermValue.Deny, createPublicThreads: PermValue.Deny, addReactions: PermValue.Deny);
+            perms = perms.Modify(sendMessages: PermValue.Deny, sendMessagesInThreads: PermValue.Deny, createPrivateThreads: PermValue.Deny, createPublicThreads: PermValue.Deny, addReactions: PermValue.Deny);
             var role = Bot.Instance.GetClient().GetGuild(textchannel.Guild.Id).EveryoneRole;
             Configuration.ChannelLocks.Add(textchannel.Id, textchannel.PermissionOverwrites.ToList());
             foreach (var thing in textchannel.PermissionOverwrites)
