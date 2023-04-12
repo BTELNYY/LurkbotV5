@@ -40,18 +40,18 @@ namespace LurkbotV5.Commands
             }
             EmbedBuilder eb = new();
             eb.Title = user.Username + " (" + id + ")";
-            eb.AddField(TranslationManager.GetTranslations().HasGuildPFP + "?", HasGuildPfp.ToString());
+            eb.AddField(TranslationManager.GetTranslations().PFPPhrases.HasGuildPFP + "?", HasGuildPfp.ToString());
             eb.ImageUrl = user.GetAvatarUrl(size: 512);
             url = user.GetAvatarUrl();
             string guildurl = user.GetGuildAvatarUrl(size: 512);
-            eb.AddField(TranslationManager.GetTranslations().PFPURL, url);
+            eb.AddField(TranslationManager.GetTranslations().PFPPhrases.PFPURL, url);
             if(HasGuildPfp && guildurl != null)
             {
                 if(guildurl == string.Empty || guildurl == null)
                 {
                     Log.WriteWarning("Guild URL is NULL!");
                 }
-                eb.AddField(TranslationManager.GetTranslations().GuildPFPURL, guildurl);
+                eb.AddField(TranslationManager.GetTranslations().PFPPhrases.GuildPFPURL, guildurl);
             }
             eb.WithCurrentTimestamp();
             Embed embed = eb.Build();

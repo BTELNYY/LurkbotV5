@@ -22,7 +22,7 @@ namespace LurkbotV5.Commands
                 PlayerStats[] players = APIManager.GetPlaytimeLeaderboard();
                 EmbedBuilder eb = new();
                 eb.WithColor(Color.Blue);
-                eb.WithTitle(TranslationManager.GetTranslations().PlaytimeLeaderboard);
+                eb.WithTitle(TranslationManager.GetTranslations().PlayerDataPhrases.PlaytimeLeaderboard);
                 string description = "```(PLACE): (USERNAME), (PLAYTIME) \n";
                 int counter = 1;
                 foreach (var player in players)

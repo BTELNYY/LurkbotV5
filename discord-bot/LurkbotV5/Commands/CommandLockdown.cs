@@ -44,7 +44,7 @@ namespace LurkbotV5.Commands
             }
 
             var textchannel = (SocketTextChannel)channel;
-            await command.RespondAsync(TranslationManager.GetTranslations().Acknowledged);
+            await command.RespondAsync(TranslationManager.GetTranslations().GenericPhrases.Acknowledged);
             if(!showCountdown)
             {
                 if (!Configuration.ChannelLocks.ContainsKey(textchannel.Id))
@@ -62,11 +62,11 @@ namespace LurkbotV5.Commands
                         }
                     }
                     await textchannel.AddPermissionOverwriteAsync(role, perms);
-                    await textchannel.SendMessageAsync(TranslationManager.GetTranslations().ChannelLockdownStarted);
+                    await textchannel.SendMessageAsync(TranslationManager.GetTranslations().LockdownPhrases.ChannelLockdownStarted);
                 }
                 else
                 {
-                    await textchannel.SendMessageAsync(TranslationManager.GetTranslations().ChannelLockdownEnded);
+                    await textchannel.SendMessageAsync(TranslationManager.GetTranslations().LockdownPhrases.ChannelLockdownEnded);
                     foreach (var thing in Configuration.ChannelLocks[textchannel.Id])
                     {
                         if(thing.TargetType == PermissionTarget.Role)
@@ -82,12 +82,12 @@ namespace LurkbotV5.Commands
             {
                 if (!Configuration.ChannelLocks.ContainsKey(textchannel.Id))
                 {
-                    await textchannel.SendMessageAsync(TranslationManager.GetTranslations().ChannelDelayedLockdownIssued + "\n" + decontamvideo);
+                    await textchannel.SendMessageAsync(TranslationManager.GetTranslations().LockdownPhrases.ChannelDelayedLockdownIssued + "\n" + decontamvideo);
                     await Task.Run(() => DelayedLockdown(textchannel));
                 }
                 else
                 {
-                    await textchannel.SendMessageAsync(TranslationManager.GetTranslations().ChannelLockdownEnded);
+                    await textchannel.SendMessageAsync(TranslationManager.GetTranslations().LockdownPhrases.ChannelLockdownEnded);
                     foreach (var thing in Configuration.ChannelLocks[textchannel.Id])
                     {
                         if (thing.TargetType == PermissionTarget.Role)
@@ -103,6 +103,7 @@ namespace LurkbotV5.Commands
 
         async Task DelayedLockdown(SocketTextChannel textchannel)
         {
+            await Task.Delay(30 * 1000);
             var perms = new OverwritePermissions();
             perms.Modify(sendMessages: PermValue.Deny, sendMessagesInThreads: PermValue.Deny, createPrivateThreads: PermValue.Deny, createPublicThreads: PermValue.Deny, addReactions: PermValue.Deny);
             var role = Bot.Instance.GetClient().GetGuild(textchannel.Guild.Id).EveryoneRole;
@@ -116,7 +117,7 @@ namespace LurkbotV5.Commands
                 }
             }
             await textchannel.AddPermissionOverwriteAsync(role, perms);
-            await textchannel.SendMessageAsync(TranslationManager.GetTranslations().ChannelDelyedLockdownStarted);
+            await textchannel.SendMessageAsync(TranslationManager.GetTranslations().LockdownPhrases.ChannelDelyedLockdownStarted);
         }
 
         public override void BuildOptions()

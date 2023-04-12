@@ -42,39 +42,73 @@ namespace LurkbotV5.Managers
     public struct Translations
     {
         //generic
-        public string Yes = "Yes";
-        public string No = "No";
-        public string Success = "Success";
-        public string Error = "Error";
-        public string Warning = "Warning";
-        public string Acknowledged = "Acknowledged";
+        public Generic GenericPhrases = new();
+        public struct Generic
+        {
+            public string Yes = "Yes";
+            public string No = "No";
+            public string Success = "Success";
+            public string Error = "Error";
+            public string Warning = "Warning";
+            public string Acknowledged = "Acknowledged";
+
+            public Generic() { }
+        }
         //playerdata
-        public string PlayerCount = "Player Count";
-        public string PlayerDetails = "Player Details: ";
-        public string SteamID = "SteamID";
-        public string FirstSeen = "First Seen";
-        public string LastSeen = "last Seen";
-        public string OldNames = "Old Names";
-        public string PlayTime = "Playtime";
-        public string Logins = "Logins";
-        public string TimeOnline = "Time Online";
-        public string Flags = "Flags";
-        public string PlaytimeLeaderboard = "Playtime Leaderboard";
+        public PlayerData PlayerDataPhrases = new();
+
+        public struct PlayerData
+        {
+            public string PlayerCount = "Player Count";
+            public string PlayerDetails = "Player Details: ";
+            public string SteamID = "SteamID";
+            public string FirstSeen = "First Seen";
+            public string LastSeen = "last Seen";
+            public string OldNames = "Old Names";
+            public string PlayTime = "Playtime";
+            public string Logins = "Logins";
+            public string TimeOnline = "Time Online";
+            public string Flags = "Flags";
+            public string PlaytimeLeaderboard = "Playtime Leaderboard";
+
+            public PlayerData() { }
+        }
         //what the levels are reffered to in UI
         //level specific
-        public string RankData = "Rank Data: ";
-        public string LevelName = "Access Tier";
-        public string XPRequiredXP = "XP/RequiredXP";
-        public string XPLocked = "XP Locked";
+        public Level LevelPhrases = new();
+
+        public struct Level
+        {
+            public string RankData = "Rank Data: ";
+            public string LevelName = "Access Tier";
+            public string XPRequiredXP = "XP/RequiredXP";
+            public string XPLocked = "XP Locked";
+
+            public Level() { }
+        }
         //userpfp
-        public string HasGuildPFP = "Has Guild PFP";
-        public string GuildPFPURL = "Guild PFP URL";
-        public string PFPURL = "PFP URL";
+        public PFP PFPPhrases = new();
+
+        public struct PFP
+        {
+            public string HasGuildPFP = "Has Guild PFP";
+            public string GuildPFPURL = "Guild PFP URL";
+            public string PFPURL = "PFP URL";
+
+            public PFP() { }
+        }
         //channel lockdown
-        public string ChannelLockdownStarted = "This channel is locked down until further notice.";
-        public string ChannelLockdownEnded = "This channel is no longer locked down.";
-        public string ChannelDelayedLockdownIssued = "Channel will be locked down in 30 seconds.";
-        public string ChannelDelyedLockdownStarted = "Channel is locked down and ready for decontamination, the removal of cringe has now begun.";
+        public Lockdown LockdownPhrases = new();
+
+        public struct Lockdown
+        {
+            public string ChannelLockdownStarted = "This channel is locked down until further notice.";
+            public string ChannelLockdownEnded = "This channel is no longer locked down.";
+            public string ChannelDelayedLockdownIssued = "Channel will be locked down in 30 seconds.";
+            public string ChannelDelyedLockdownStarted = "Channel is locked down and ready for decontamination, the removal of cringe has now begun.";
+
+            public Lockdown() { }
+        }
 
         public Translations()
         {

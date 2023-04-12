@@ -33,10 +33,10 @@ namespace LurkbotV5.Commands
             DiscordUserConfig cfg = DiscordManager.GetUserConfig(id);
             DiscordManager.SetUserConfig(cfg);
             EmbedBuilder eb = new();
-            eb.WithTitle(TranslationManager.GetTranslations().RankData + user.Username);
-            eb.AddField(TranslationManager.GetTranslations().LevelName, cfg.XPLevel);
-            eb.AddField(TranslationManager.GetTranslations().XPRequiredXP, string.Format("{0:0.0}", cfg.XP) + "/" + DiscordManager.GetXPPerLevel(cfg.XPLevel));
-            eb.AddField(TranslationManager.GetTranslations().XPLocked + "?", cfg.LockXP ? TranslationManager.GetTranslations().Yes : TranslationManager.GetTranslations().No);
+            eb.WithTitle(TranslationManager.GetTranslations().LevelPhrases.RankData + user.Username);
+            eb.AddField(TranslationManager.GetTranslations().LevelPhrases.LevelName, cfg.XPLevel);
+            eb.AddField(TranslationManager.GetTranslations().LevelPhrases.XPRequiredXP, string.Format("{0:0.0}", cfg.XP) + "/" + DiscordManager.GetXPPerLevel(cfg.XPLevel));
+            eb.AddField(TranslationManager.GetTranslations().LevelPhrases.XPLocked + "?", cfg.LockXP ? TranslationManager.GetTranslations().GenericPhrases.Yes : TranslationManager.GetTranslations().GenericPhrases.No);
             eb.WithColor(Color.Blue);
             eb.WithCurrentTimestamp();
             try
