@@ -110,6 +110,37 @@ namespace LurkbotV5.Managers
             public Lockdown() { }
         }
 
+
+        public LevelRole LevelRolePhrases = new();
+        public struct LevelRole
+        {
+            public string FailedParseAction = "Unable to parse requested action.";
+            public string SuccessAddingLevelRole = "Added level role with no issues.";
+            public string GeneralFailure = "Error occured while running command. See log.";
+            public string NoSuchRoleLevel = "No role level exists for stated XP level.";
+            public string SuccessRemovingLevelRole = "Removed level role with no issues.";
+            
+
+            public LevelRole()
+            {
+
+            }
+        }
+
+        public Timeout TimeoutPhrases = new();
+
+        public struct Timeout
+        {
+            public string UserTimedOut = "{user} was timed out.";
+            public string DurationTooShort = "You must specify a longer timeout duration.";
+            public string DurationField = "Length (seconds)";
+            public string ReasonField = "Reason";
+            public string AuthorField = "Author";
+
+            public Timeout() { }
+        }
+
+
         public Translations()
         {
 

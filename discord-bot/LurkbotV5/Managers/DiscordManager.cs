@@ -86,6 +86,9 @@ namespace LurkbotV5
             BuildCommand(new CommandDestroyAppCommands());
             BuildCommand(new CommandLeaderboard());
             BuildCommand(new CommandLockdown());
+            BuildCommand(new CommandTimeout());
+            BuildCommand(new CommandAddLevelRole());
+            BuildCommand(new CommandRemoveLevelRole());
         }
         public void RepeatTaskInit()
         {
@@ -567,6 +570,10 @@ namespace LurkbotV5
                     return false;
                 }
             }
+        }
+        public static bool RoleLevelExists(uint value)
+        {
+            return LevelRoles.RoleLevels.ContainsKey(value);
         }
         public static DiscordUserConfig GetUserConfig(ulong UserID)
         {
