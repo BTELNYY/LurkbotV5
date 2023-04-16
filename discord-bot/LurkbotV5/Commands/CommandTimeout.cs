@@ -22,7 +22,7 @@ namespace LurkbotV5.Commands
             string reason = "No reason given.";
             if(command.Data.Options.Count > 2)
             {
-                reason = (string) command.Data.Options.ToList()[3].Value;
+                reason = (string) command.Data.Options.ToList()[2].Value;
             }
             if(length <= 30)
             {
@@ -35,7 +35,7 @@ namespace LurkbotV5.Commands
             eb.WithTitle(TranslationManager.GetTranslations().TimeoutPhrases.UserTimedOut.Replace("{user}", target.Username));
             eb.AddField(TranslationManager.GetTranslations().TimeoutPhrases.ReasonField, reason);
             eb.AddField(TranslationManager.GetTranslations().TimeoutPhrases.DurationField, length.ToString());
-            eb.AddField(TranslationManager.GetTranslations().TimeoutPhrases.AuthorField, $"<@{command.User.Id}");
+            eb.AddField(TranslationManager.GetTranslations().TimeoutPhrases.AuthorField, $"<@{command.User.Id}>");
             eb.WithColor(Color.Blue);
             await command.RespondAsync(embed: eb.Build());
         }
