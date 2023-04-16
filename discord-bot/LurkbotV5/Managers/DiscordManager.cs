@@ -473,7 +473,8 @@ namespace LurkbotV5
         {
             if (msg.Value == null)
             {
-                Log.WriteWarning("OnGhostPing msg is null!");
+                Log.WriteWarning("OnMessageDeleted msg is null!");
+                return Task.CompletedTask;
             }
             if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
             {
@@ -485,19 +486,28 @@ namespace LurkbotV5
                 Log.WriteFatal("Channel not found! " + GetBot().GetConfig().DeletedMessagesChannelID);
                 return Task.CompletedTask;
             }
-            Log.WriteDebug("Channel obtained");
             EmbedBuilder eb = new();
             eb.WithTitle("Deleted Message");
             eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
             eb.AddField("Channel", "<#" + channel.Id + ">");
             eb.AddField("Content (text) ", msg.Value.Content);
-            if (msg.Value.Embeds.Count > 0)
+            if (msg.Value.Attachments.Count > 0)
             {
-                Embed[] embeds = { eb.Build() };
-                foreach (var embed in msg.Value.Embeds)
+                string atturls = "";
+                foreach (var att in msg.Value.Attachments)
                 {
-                    embeds.Append(embed);
+                    string attachmentparsed = att.Url.Replace("media", "cdn").Replace("net", "com");
+                    if(att == msg.Value.Attachments.Last())
+                    {
+                        atturls += attachmentparsed;
+                    }
+                    else
+                    {
+                        atturls += attachmentparsed + "\n";
+                    }
                 }
+                eb.AddField("Attachments", "");
+                Embed[] embeds = { eb.Build() };
                 channel1.SendMessageAsync(embeds: embeds);
             }
             else
