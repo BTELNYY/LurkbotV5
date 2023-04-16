@@ -19,8 +19,9 @@ internal class CommandGetPlayerStats : CommandBase
     public override CommandType CommandType => CommandType.SL;
     public override async void Execute(SocketSlashCommand command)
     {
+        SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
         Embed[] embeds;
-        PlayerStats stats = APIManager.GetPlayerStats(command.Data.Options.First().Value.ToString());
+        PlayerStats stats = APIManager.GetPlayerStats((string) options[0].Value);
         if (stats.PlayTime == -1)
         {
             await command.RespondAsync(embed: Utility.GetErrorEmbed("Error", "Error fetching user."));

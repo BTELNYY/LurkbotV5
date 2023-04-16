@@ -119,6 +119,8 @@ namespace LurkbotV5.Managers
             public string GeneralFailure = "Error occured while running command. See log.";
             public string NoSuchRoleLevel = "No role level exists for stated XP level.";
             public string SuccessRemovingLevelRole = "Removed level role with no issues.";
+            public string ParsingUsers = "Parsing users and assigning roles as needed....";
+            public string DoneParse = "Parse Complete.";
             
 
             public LevelRole()

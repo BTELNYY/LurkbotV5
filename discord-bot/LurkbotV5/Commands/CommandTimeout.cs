@@ -17,14 +17,15 @@ namespace LurkbotV5.Commands
 
         public async override void Execute(SocketSlashCommand command)
         {
-            SocketGuildUser target = (SocketGuildUser) command.Data.Options.ToList()[0].Value;
-            long length = (long) command.Data.Options.ToList()[1].Value;
+            SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
+            SocketGuildUser target = (SocketGuildUser) options[0].Value;
+            long length = (long) options[1].Value;
             string reason = "No reason given.";
             if(command.Data.Options.Count > 2)
             {
-                reason = (string) command.Data.Options.ToList()[2].Value;
+                reason = (string)options[2].Value;
             }
-            if(length <= 30)
+            if(length < 30)
             {
                 //too short of length
                 await command.RespondAsync(TranslationManager.GetTranslations().TimeoutPhrases.DurationTooShort);

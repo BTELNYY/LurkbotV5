@@ -17,13 +17,14 @@ namespace LurkbotV5.Commands
         public override GuildPermission RequiredPermission => GuildPermission.ManageRoles;
         public override async void Execute(SocketSlashCommand command)
         {
-            long level = (long)command.Data.Options.ToList()[0].Value;
-            ulong RoleID = ((SocketRole)command.Data.Options.ToList()[1].Value).Id;
+            SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
+            long level = (long)options[0].Value;    
+            ulong RoleID = ((SocketRole)options[1].Value).Id;
             RoleLevelActions flag = RoleLevelActions.ADD;
             try
             {
-                Log.WriteDebug("Parsing Tag: " + command.Data.Options.ToList()[2].Value.ToString());
-                flag = Enum.Parse<RoleLevelActions>(command.Data.Options.ToList()[2].Value.ToString());
+                Log.WriteDebug("Parsing Tag: " + options[2].Value.ToString());
+                flag = Enum.Parse<RoleLevelActions>((string) options[2].Value);
             }
             catch (Exception ex)
             {

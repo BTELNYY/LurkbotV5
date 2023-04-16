@@ -18,6 +18,7 @@ namespace LurkbotV5.Commands
 
         public async override void Execute(SocketSlashCommand command)
         {
+            SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
             ulong id;
             SocketUser user;
             if (command.Data.Options.Count == 0)
@@ -27,7 +28,7 @@ namespace LurkbotV5.Commands
             }
             else
             {
-                user = (SocketUser)command.Data.Options.ToList()[0].Value;
+                user = (SocketUser)options[0].Value;
                 id = user.Id;
             }
             DiscordUserConfig cfg = DiscordManager.GetUserConfig(id);

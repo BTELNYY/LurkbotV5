@@ -19,6 +19,7 @@ namespace LurkbotV5.Commands
 
         public override void Execute(SocketSlashCommand command)
         {
+            SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
             ulong id;
             SocketGuildUser user;
             if (command.Data.Options.Count == 0)
@@ -28,7 +29,7 @@ namespace LurkbotV5.Commands
             }
             else
             {
-                user = (SocketGuildUser)command.Data.Options.ToList()[0].Value;
+                user = (SocketGuildUser) options[0].Value;
                 id = user.Id;
             }
             string url = "";

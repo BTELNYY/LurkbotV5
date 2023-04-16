@@ -17,8 +17,9 @@ namespace LurkbotV5.Commands
         public override GuildPermission RequiredPermission => GuildPermission.ManageRoles;
         public override async void Execute(SocketSlashCommand command)
         {
-            long level = (long)command.Data.Options.ToList()[0].Value;
-            ulong RoleID = ((SocketRole)command.Data.Options.ToList()[1].Value).Id;
+            SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
+            long level = (long)options[0].Value;
+            ulong RoleID = ((SocketRole)options[1].Value).Id;
             if (!DiscordManager.RoleLevelExists((uint)level))
             {
                 await command.RespondAsync(TranslationManager.GetTranslations().LevelRolePhrases.NoSuchRoleLevel);

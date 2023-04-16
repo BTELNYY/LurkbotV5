@@ -18,14 +18,15 @@ namespace LurkbotV5.Commands
         public override bool IsDefaultEnabled => true;
 
         public async override void Execute(SocketSlashCommand command)
-        { 
+        {
+            SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
 
             bool showCountdown = false;
             string decontamvideo = "https://cdn.discordapp.com/attachments/887518399939350538/941157854734323712/SCP_SL_Light_Containment_Zone_Decontamination_30_Seconds.mp4";
             var channel = command.Channel;
-            if (command.Data.Options.Count > 0 && command.Data.Options.First().Value is not null)
+            if (command.Data.Options.Count > 0 && options[0].Value is not null)
             {
-                if((bool)command.Data.Options.First().Value == true)
+                if ((bool)options[0].Value == true)
                 {
                     showCountdown = true;
                 }
