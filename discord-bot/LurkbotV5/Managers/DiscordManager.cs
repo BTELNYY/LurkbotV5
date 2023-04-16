@@ -491,7 +491,7 @@ namespace LurkbotV5
             eb.WithTitle("Deleted Message");
             eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
             eb.AddField("Channel", "<#" + channel.Id + ">");
-            if (msg.Value.Content != null || msg.Value.Content != string.Empty)
+            if (msg.Value.Content != null || !string.IsNullOrEmpty(msg.Value.Content))
             {
                 eb.AddField("Content (text)", msg.Value.Content);
             }
@@ -512,7 +512,7 @@ namespace LurkbotV5
                         atturls += attachmentparsed + "\n";
                     }
                 }
-                eb.AddField("Attachments", "");
+                eb.AddField("Attachments", atturls);
                 Embed[] embeds = { eb.Build() };
                 channel1.SendMessageAsync(embeds: embeds);
             }
