@@ -19,7 +19,7 @@ namespace LurkbotV5.Commands
         {
             await command.RespondAsync(TranslationManager.GetTranslations().LevelRolePhrases.ParsingUsers);
             DiscordManager.RefreshAllSavedUsers();
-            await command.RespondAsync(TranslationManager.GetTranslations().LevelRolePhrases.DoneParse);
+            await command.Channel.SendMessageAsync(TranslationManager.GetTranslations().LevelRolePhrases.DoneParse);
         }
     }
 }
