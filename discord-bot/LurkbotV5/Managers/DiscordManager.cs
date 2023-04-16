@@ -491,9 +491,9 @@ namespace LurkbotV5
             eb.WithTitle("Deleted Message");
             eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
             eb.AddField("Channel", "<#" + channel.Id + ">");
-            if (msg.Value.Content != null)
+            if (msg.Value.Content != null || msg.Value.Content != string.Empty)
             {
-                eb.AddField("Content (text) ", msg.Value.Content);
+                eb.AddField("Content (text)", msg.Value.Content);
             }
             if (msg.Value.Attachments.Count > 0)
             {
