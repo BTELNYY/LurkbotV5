@@ -497,6 +497,8 @@ namespace LurkbotV5
                 foreach (var att in msg.Value.Attachments)
                 {
                     string attachmentparsed = att.Url.Replace("media", "cdn").Replace("net", "com");
+                    Log.WriteDebug(attachmentparsed);
+                    Log.WriteDebug(att.Url);
                     if(att == msg.Value.Attachments.Last())
                     {
                         atturls += attachmentparsed;
