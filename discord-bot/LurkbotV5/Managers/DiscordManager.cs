@@ -486,11 +486,15 @@ namespace LurkbotV5
                 Log.WriteFatal("Channel not found! " + GetBot().GetConfig().DeletedMessagesChannelID);
                 return Task.CompletedTask;
             }
+
             EmbedBuilder eb = new();
             eb.WithTitle("Deleted Message");
             eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
             eb.AddField("Channel", "<#" + channel.Id + ">");
-            eb.AddField("Content (text) ", msg.Value.Content);
+            if (msg.Value.Content != null)
+            {
+                eb.AddField("Content (text) ", msg.Value.Content);
+            }
             if (msg.Value.Attachments.Count > 0)
             {
                 string atturls = "";
