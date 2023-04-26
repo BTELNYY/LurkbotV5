@@ -19,7 +19,7 @@ namespace LurkbotV5.Commands
             SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
             SocketGuildUser user = (SocketGuildUser)options[0].Value;
             string reason = TranslationManager.GetTranslations().GenericPhrases.NoReason;
-            if(options.Length > 1)
+            if(command.Data.Options.Count > 1)
             {
                 reason = (string)options[1].Value;
             }
