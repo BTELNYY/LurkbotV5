@@ -26,7 +26,7 @@ namespace LurkbotV5.Commands
             var channel = command.Channel;
             if (channel is null)
             {
-                Log.WriteError("Failed to get channel in lockdown command!");
+                Log.WriteError("Failed to get channel in channelmute command!");
                 await command.RespondAsync("There was an error, see log.");
                 return;
             }
@@ -41,6 +41,8 @@ namespace LurkbotV5.Commands
                 eb.WithTitle(TranslationManager.GetTranslations().ChannelMutePhrases.ChannelMuteUser);
                 eb.AddField(TranslationManager.GetTranslations().GenericPhrases.AuthorField, $"<@{command.User.Id}>");
                 eb.AddField(TranslationManager.GetTranslations().GenericPhrases.ReasonField, reason);
+                await command.RespondAsync(embed: eb.Build());
+                return;
             }
             else
             {
@@ -49,6 +51,8 @@ namespace LurkbotV5.Commands
                 eb.WithTitle(TranslationManager.GetTranslations().ChannelMutePhrases.ChannelUnmuteUser);
                 eb.AddField(TranslationManager.GetTranslations().GenericPhrases.AuthorField, $"<@{command.User.Id}>");
                 eb.AddField(TranslationManager.GetTranslations().GenericPhrases.ReasonField, reason);
+                await command.RespondAsync(embed: eb.Build());
+                return;
             }
 
         }
