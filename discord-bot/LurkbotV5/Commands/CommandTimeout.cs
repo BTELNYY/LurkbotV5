@@ -20,8 +20,8 @@ namespace LurkbotV5.Commands
             SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
             SocketGuildUser target = (SocketGuildUser) options[0].Value;
             long length = (long) options[1].Value;
-            string reason = "No reason given.";
-            if(command.Data.Options.Count > 2)
+            string reason = TranslationManager.GetTranslations().GenericPhrases.NoReason;
+            if (command.Data.Options.Count > 2)
             {
                 reason = (string)options[2].Value;
             }
@@ -34,9 +34,9 @@ namespace LurkbotV5.Commands
             await target.SetTimeOutAsync(TimeSpan.FromSeconds(length));
             EmbedBuilder eb = new();
             eb.WithTitle(TranslationManager.GetTranslations().TimeoutPhrases.UserTimedOut.Replace("{user}", target.Username));
-            eb.AddField(TranslationManager.GetTranslations().TimeoutPhrases.ReasonField, reason);
-            eb.AddField(TranslationManager.GetTranslations().TimeoutPhrases.DurationField, length.ToString());
-            eb.AddField(TranslationManager.GetTranslations().TimeoutPhrases.AuthorField, $"<@{command.User.Id}>");
+            eb.AddField(TranslationManager.GetTranslations().GenericPhrases.ReasonField, reason);
+            eb.AddField(TranslationManager.GetTranslations().GenericPhrases.DurationField, length.ToString());
+            eb.AddField(TranslationManager.GetTranslations().GenericPhrases.AuthorField, $"<@{command.User.Id}>");
             eb.WithColor(Color.Blue);
             await command.RespondAsync(embed: eb.Build());
         }

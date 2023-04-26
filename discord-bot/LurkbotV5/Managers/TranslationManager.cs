@@ -51,7 +51,10 @@ namespace LurkbotV5.Managers
             public string Error = "Error";
             public string Warning = "Warning";
             public string Acknowledged = "Acknowledged";
-
+            public string DurationField = "Length (seconds)";
+            public string ReasonField = "Reason";
+            public string AuthorField = "Author";
+            public string NoReason = "No Reason Given";
             public Generic() { }
         }
         //playerdata
@@ -135,13 +138,20 @@ namespace LurkbotV5.Managers
         {
             public string UserTimedOut = "{user} was timed out.";
             public string DurationTooShort = "You must specify a longer timeout duration.";
-            public string DurationField = "Length (seconds)";
-            public string ReasonField = "Reason";
-            public string AuthorField = "Author";
+
 
             public Timeout() { }
         }
 
+        public ChannelMute ChannelMutePhrases = new();
+
+        public struct ChannelMute
+        {
+            public string ChannelMuteUser = "{user} was muted in this channel.";
+            public string ChannelUnmuteUser = "{user} was unmuted in this channel.";
+
+            public ChannelMute() { } 
+        }
 
         public Translations()
         {
