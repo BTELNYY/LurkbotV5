@@ -493,7 +493,10 @@ namespace LurkbotV5
             eb.AddField("Channel", "<#" + channel.Id + ">");
             if (msg.Value.Content != null || !string.IsNullOrEmpty(msg.Value.Content))
             {
-                eb.AddField("Content (text)", msg.Value.Content);
+                if(msg.Value.Content.Length > 0)
+                {
+                    eb.AddField("Content (text)", msg.Value.Content);
+                }
             }
             if (msg.Value.Attachments.Count > 0)
             {
