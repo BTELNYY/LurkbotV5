@@ -38,7 +38,8 @@ namespace LurkbotV5.Commands
             {
                 await textchannel.AddPermissionOverwriteAsync(user, perms);
                 EmbedBuilder eb = new();
-                eb.WithTitle(TranslationManager.GetTranslations().ChannelMutePhrases.ChannelMuteUser);
+                eb.WithTitle(TranslationManager.GetTranslations().ChannelMutePhrases.ChannelMuteUser.Replace("{user}", user.Username));
+                eb.Color = Color.Blue;
                 eb.AddField(TranslationManager.GetTranslations().GenericPhrases.AuthorField, $"<@{command.User.Id}>");
                 eb.AddField(TranslationManager.GetTranslations().GenericPhrases.ReasonField, reason);
                 await command.RespondAsync(embed: eb.Build());
@@ -48,7 +49,8 @@ namespace LurkbotV5.Commands
             {
                 await textchannel.AddPermissionOverwriteAsync(user, OverwritePermissions.InheritAll);
                 EmbedBuilder eb = new();
-                eb.WithTitle(TranslationManager.GetTranslations().ChannelMutePhrases.ChannelUnmuteUser);
+                eb.WithTitle(TranslationManager.GetTranslations().ChannelMutePhrases.ChannelUnmuteUser.Replace("{user}", user.Username));
+                eb.Color = Color.Blue;
                 eb.AddField(TranslationManager.GetTranslations().GenericPhrases.AuthorField, $"<@{command.User.Id}>");
                 eb.AddField(TranslationManager.GetTranslations().GenericPhrases.ReasonField, reason);
                 await command.RespondAsync(embed: eb.Build());
