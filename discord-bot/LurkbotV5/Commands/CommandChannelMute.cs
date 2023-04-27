@@ -48,6 +48,7 @@ namespace LurkbotV5.Commands
             else
             {
                 await textchannel.AddPermissionOverwriteAsync(user, OverwritePermissions.InheritAll);
+                await textchannel.RemovePermissionOverwriteAsync(user);
                 EmbedBuilder eb = new();
                 eb.WithTitle(TranslationManager.GetTranslations().ChannelMutePhrases.ChannelUnmuteUser.Replace("{user}", user.Username));
                 eb.Color = Color.Blue;
