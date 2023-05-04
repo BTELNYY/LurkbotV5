@@ -22,9 +22,13 @@ namespace LurkbotV5.Commands
             long amount = (long)options[0].Value;
             await command.RespondAsync(TranslationManager.GetTranslations().GenericPhrases.Acknowledged);
             var channel = command.Channel;
-            var messages = channel.GetMessagesAsync((int) amount).FlattenAsync().Result.ToList();
+            var messages = channel.GetMessagesAsync((int) amount + 1).FlattenAsync().Result.ToList();
             foreach(var message in messages)
             {
+                if(message.Author.Id == Bot.Instance.GetClient().CurrentUser.Id)
+                {
+                    continue;
+                }
                 await message.DeleteAsync();
             }
         }
