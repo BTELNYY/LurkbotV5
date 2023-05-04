@@ -23,6 +23,8 @@ namespace LurkbotV5
 
         public static Dictionary<ulong, string> LastMessageCache = new();
 
+        public static List<ulong> DoNotNotifyGhostPingCache = new();
+
         public static DiscordConfig DiscordConfig { get; private set; }
 
         public static LevelRoles LevelRoles { get; private set; }
@@ -440,6 +442,10 @@ namespace LurkbotV5
                 Log.WriteWarning("OnGhostPing msg is null!");
             }
             if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
+            {
+                return Task.CompletedTask;
+            }
+            if (DoNotNotifyGhostPingCache.Contains(msg.Value.Id))
             {
                 return Task.CompletedTask;
             }

@@ -23,11 +23,15 @@ namespace LurkbotV5.Commands
             await command.RespondAsync(TranslationManager.GetTranslations().GenericPhrases.Acknowledged);
             var channel = command.Channel;
             var messages = channel.GetMessagesAsync((int) amount + 1).FlattenAsync().Result.ToList();
-            foreach(var message in messages)
+            foreach (var message in messages)
             {
-                if(message.Author.Id == Bot.Instance.GetClient().CurrentUser.Id)
+                if (message.Author.Id == Bot.Instance.GetClient().CurrentUser.Id)
                 {
                     continue;
+                }
+                if (message.MentionedUserIds.Count > 0)
+                {
+                    DiscordManager.DoNotNotifyGhostPingCache.Add(message.Id);
                 }
                 await message.DeleteAsync();
             }
