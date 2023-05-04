@@ -35,6 +35,7 @@ namespace LurkbotV5.Commands
                 }
                 await message.DeleteAsync();
             }
+            DiscordManager.DoNotNotifyGhostPingCache.Clear();
         }
 
         public override void BuildOptions()
