@@ -23,20 +23,27 @@ namespace LurkbotV5.Commands
             bool senddm = (bool)options[2].Value;
             bool hideauthor = (bool)options[3].Value;
             await user.KickAsync(reason);
-            if(senddm)
+            try
             {
-                if(hideauthor && command.GuildId != null)
+                if (senddm)
                 {
-                    await user.SendMessageAsync(TranslationManager.GetTranslations().DirectMessagePhrases.UserKickedFromGuildNoAuthor.Replace("{server}", Bot.Instance.GetClient().GetGuild((ulong)command.GuildId).Name).Replace("{reason}", reason));
-                }
-                else
-                {
-                    if(command.GuildId == null)
+                    if (hideauthor && command.GuildId != null)
+                    {
+                        await user.SendMessageAsync(TranslationManager.GetTranslations().DirectMessagePhrases.UserKickedFromGuildNoAuthor.Replace("{server}", Bot.Instance.GetClient().GetGuild((ulong)command.GuildId).Name).Replace("{reason}", reason));
+                    }
+                    else
+                    {
+                    if (command.GuildId == null)
                     {
                         return;
                     }
                     await user.SendMessageAsync(TranslationManager.GetTranslations().DirectMessagePhrases.UserKickedFromGuildNoAuthor.Replace("{server}", Bot.Instance.GetClient().GetGuild((ulong)command.GuildId).Name).Replace("{reason}", reason).Replace("{author}", command.User.Username + "#" + command.User.Discriminator));
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.WriteError(ex.ToString());
             }
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithCurrentTimestamp();
