@@ -34,11 +34,13 @@ namespace LurkbotV5.Commands
                 {
                     loggedstring += $" {attachment.Url}";
                 }
+                loggedstring += "\n";
                 counter++;
                 Log.WriteDebug("Parsed " + counter + " messages for backup.");
-                sw.WriteLine(loggedstring);
+                sw.Write(loggedstring);
             }
             sw.Close();
+            await channel.SendMessageAsync(TranslationManager.GetTranslations().GenericPhrases.Success);
         }
     }
 }
