@@ -57,6 +57,19 @@ namespace LurkbotV5.Managers
             public string NoReason = "No Reason Given";
             public Generic() { }
         }
+
+        public Moderation ModerationPhrases = new();
+
+        public struct Moderation
+        {
+            public string UserKicked = "{user} was kicked";
+            public string UserBanned = "{user} was banned";
+
+            public Moderation() { }
+        }
+
+
+
         //playerdata
         public PlayerData PlayerDataPhrases = new();
 
@@ -151,6 +164,18 @@ namespace LurkbotV5.Managers
             public string ChannelUnmuteUser = "{user} was unmuted in this channel.";
 
             public ChannelMute() { } 
+        }
+
+        public DirectMessage DirectMessagePhrases = new();
+
+        public struct DirectMessage
+        {
+            public string UserKickedFromGuildNoAuthor = "You have been kicked from `{server}` for `{reason}`";
+            public string UserKickedFromGuild = "You have been kicked from `{server}` for `{reason}` by `{author}`";
+            public string UserBannedFromGuildNoAuthor = "You have been banned from `{server}` for `{reason}`";
+            public string UserBannedFromGuild = "You have been banned from `{server}` for `{reason}` by `{author}`";
+
+            public DirectMessage() { }
         }
 
         public Translations()

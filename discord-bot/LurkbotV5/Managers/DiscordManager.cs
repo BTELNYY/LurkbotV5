@@ -95,6 +95,7 @@ namespace LurkbotV5
             BuildCommand(new CommandChannelMute());
             BuildCommand(new CommandPurge());
             BuildCommand(new CommandBackupChannel());
+            BuildCommand(new CommandKickUser());
         }
         public void RepeatTaskInit()
         {
