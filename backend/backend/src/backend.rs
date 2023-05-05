@@ -83,9 +83,9 @@ async fn update_player(
     let nick = if !raw_id.ends_with("northwood")
     {
         player
-            .nickname = Some("None".to_string())
-            //.clone()
-            //.expect("Non-northwood player has no nickname")
+            .nickname
+            .clone()
+            .expect("Non-northwood player has no nickname")
     } 
     else {
         let mut nick_parts = player.id.split("@");
