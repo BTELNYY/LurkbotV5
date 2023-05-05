@@ -19,7 +19,7 @@ namespace LurkbotV5.Commands
         {
             await command.RespondAsync(TranslationManager.GetTranslations().GenericPhrases.Acknowledged);
             var channel = command.Channel;
-            var messages = channel.GetMessagesAsync(-1).FlattenAsync().Result;
+            var messages = channel.GetMessagesAsync(int.MaxValue).FlattenAsync().Result;
             string filepath = $"./channel_backups/backup_{channel.Name}_{DateTime.Now.ToString("\"dd-MM-yyyy\"")}-{DateTime.Now.ToString("hh\\:mm\\:ss")}.txt";
             StreamWriter sw = new StreamWriter(filepath, append: true);
             ulong counter = 0;
