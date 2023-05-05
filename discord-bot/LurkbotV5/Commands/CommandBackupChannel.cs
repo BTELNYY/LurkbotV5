@@ -22,6 +22,7 @@ namespace LurkbotV5.Commands
             var messages = channel.GetMessagesAsync(-1).FlattenAsync().Result;
             string filepath = $"./channel_backups/backup_{channel.Name}_{DateTime.Now.ToString("\"dd-MM-yyyy\"")}-{DateTime.Now.ToString("hh\\:mm\\:ss")}.txt";
             StreamWriter sw = new StreamWriter(filepath, append: true);
+            ulong counter = 0;
             foreach (var message in messages)
             {
                 string loggedstring = "";
@@ -33,6 +34,8 @@ namespace LurkbotV5.Commands
                 {
                     loggedstring += $" {attachment.Url}";
                 }
+                counter++;
+                Log.WriteDebug("Parsed " + counter + " messages for backup.");
                 sw.WriteLine(loggedstring);
             }
             sw.Close();
