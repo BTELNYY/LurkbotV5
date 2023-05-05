@@ -83,7 +83,7 @@ async fn update_player(
     let nick = if !raw_id.ends_with("northwood")
     {
         player
-            .nickname = "None".to_string()
+            .nickname = Some("None".to_string())
             //.clone()
             //.expect("Non-northwood player has no nickname")
     } 
