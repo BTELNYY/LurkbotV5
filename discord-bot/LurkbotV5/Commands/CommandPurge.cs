@@ -20,12 +20,20 @@ namespace LurkbotV5.Commands
             base.Execute(command);
             SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
             long amount = (long)options[0].Value;
+            bool deleteself = false;
+            if(command.Data.Options.Count > 1) 
+            {
+                deleteself = (bool)options[1].Value;
+            }
             await command.RespondAsync(TranslationManager.GetTranslations().GenericPhrases.Acknowledged);
             var channel = command.Channel;
-            var messages = channel.GetMessagesAsync((int) amount + 1).FlattenAsync().Result.ToList();
+            //basically, because we want to specifically delete x amount of messages, and our bot message counts, if we dont delete it, add one extra so we delete x amount of messages
+            int extraamount = 1;
+            if(!deleteself) { extraamount = 0; }
+            var messages = channel.GetMessagesAsync((int) amount + extraamount).FlattenAsync().Result.ToList();
             foreach (var message in messages)
             {
-                if (message.Author.Id == Bot.Instance.GetClient().CurrentUser.Id)
+                if (message.Author.Id == Bot.Instance.GetClient().CurrentUser.Id && !deleteself)
                 {
                     continue;
                 }
@@ -48,8 +56,16 @@ namespace LurkbotV5.Commands
                 OptionType = ApplicationCommandOptionType.Integer,
                 Required = true
             };
+            CommandOptionsBase cob1 = new()
+            {
+                Name = "deleteself",
+                Description = "Should the bot delete its own messages?",
+                OptionType = ApplicationCommandOptionType.Boolean,
+                Required = false
+            };
             Options.Clear();
             Options.Add(cob);
+            Options.Add(cob1);
         }
     }
 }
