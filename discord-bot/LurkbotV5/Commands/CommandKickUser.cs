@@ -47,7 +47,7 @@ namespace LurkbotV5.Commands
             }
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithCurrentTimestamp();
-            eb.WithTitle(TranslationManager.GetTranslations().ModerationPhrases.UserKicked);
+            eb.WithTitle(TranslationManager.GetTranslations().ModerationPhrases.UserKicked.Replace("{user}", user.Username + "#" + user.Discriminator));
             eb.AddField(TranslationManager.GetTranslations().GenericPhrases.ReasonField, reason);
             if (!hideauthor)
             {
