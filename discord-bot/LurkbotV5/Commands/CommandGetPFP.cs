@@ -19,6 +19,7 @@ namespace LurkbotV5.Commands
 
         public override void Execute(SocketSlashCommand command)
         {
+            SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
             ulong id;
             SocketGuildUser user;
             if (command.Data.Options.Count == 0)
@@ -28,26 +29,30 @@ namespace LurkbotV5.Commands
             }
             else
             {
-                user = (SocketGuildUser)command.Data.Options.ToList()[0].Value;
+                user = (SocketGuildUser) options[0].Value;
                 id = user.Id;
             }
             string url = "";
             bool HasGuildPfp = false;
             
-            if(user.GetGuildAvatarUrl(size: 512) != user.GetAvatarUrl(size: 512))
+            if(user.GetGuildAvatarUrl(size: 512) != null)
             {
                 HasGuildPfp = true;
             }
             EmbedBuilder eb = new();
             eb.Title = user.Username + " (" + id + ")";
-            eb.AddField(TranslationManager.GetTranslations().HasGuildPFP + "?", HasGuildPfp.ToString());
+            eb.AddField(TranslationManager.GetTranslations().PFPPhrases.HasGuildPFP + "?", HasGuildPfp.ToString());
             eb.ImageUrl = user.GetAvatarUrl(size: 512);
             url = user.GetAvatarUrl();
-            string guildurl = user.GetGuildAvatarUrl();
-            eb.AddField(TranslationManager.GetTranslations().PFPURL, url);
-            if(HasGuildPfp)
+            string guildurl = user.GetGuildAvatarUrl(size: 512);
+            eb.AddField(TranslationManager.GetTranslations().PFPPhrases.PFPURL, url);
+            if(HasGuildPfp && guildurl != null)
             {
-                eb.AddField(TranslationManager.GetTranslations().GuildPFPURL, guildurl);
+                if(guildurl == string.Empty || guildurl == null)
+                {
+                    Log.WriteWarning("Guild URL is NULL!");
+                }
+                eb.AddField(TranslationManager.GetTranslations().PFPPhrases.GuildPFPURL, guildurl);
             }
             eb.WithCurrentTimestamp();
             Embed embed = eb.Build();

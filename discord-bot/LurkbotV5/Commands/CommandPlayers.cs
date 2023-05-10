@@ -17,7 +17,6 @@ internal class CommandPlayers : CommandBase
     public override CommandType CommandType => CommandType.SL;
     public override async void Execute(SocketSlashCommand command)
     {
-        string response = "";
         EmbedBuilder eb = new();
         eb.WithTitle("Player Count");
         eb.Color = Color.Blue;

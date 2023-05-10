@@ -1,10 +1,15 @@
 ﻿using btelnyy.ConfigLoader.API;
+using Discord;
 using System;
 
 namespace LurkbotV5
 {
     public class Configuration
     {
+        public static Dictionary<ulong, List<Overwrite>> ChannelLocks = new Dictionary<ulong, List<Overwrite>>();
+
+
+
         public string Token { get; set; } = "token";
         public bool DisableNonSLCommands { get; set; } = false;
         public uint RefreshCooldown { get; set; } = 60;

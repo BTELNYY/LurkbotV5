@@ -19,8 +19,9 @@ internal class CommandGetPlayerStats : CommandBase
     public override CommandType CommandType => CommandType.SL;
     public override async void Execute(SocketSlashCommand command)
     {
+        SocketSlashCommandDataOption[] options = GetOptionsOrdered(command.Data.Options.ToList());
         Embed[] embeds;
-        PlayerStats stats = APIManager.GetPlayerStats(command.Data.Options.First().Value.ToString());
+        PlayerStats stats = APIManager.GetPlayerStats((string) options[0].Value);
         if (stats.PlayTime == -1)
         {
             await command.RespondAsync(embed: Utility.GetErrorEmbed("Error", "Error fetching user."));
@@ -28,16 +29,16 @@ internal class CommandGetPlayerStats : CommandBase
         }
         EmbedBuilder eb = new();
         eb.WithColor(Color.Blue);
-        eb.WithTitle(TranslationManager.GetTranslations().PlayerDetails + stats.LastNickname);
-        eb.AddField(TranslationManager.GetTranslations().SteamID, stats.SteamID);
-        eb.AddField(TranslationManager.GetTranslations().FirstSeen, stats.FirstSeen.ToString("dd-MM-yyyy") + " at " + stats.FirstSeen.ToString("hh\\:mm\\:ss"));
-        eb.AddField(TranslationManager.GetTranslations().LastSeen, stats.LastSeen.ToString("dd-MM-yyyy") + " at " + stats.LastSeen.ToString("hh\\:mm\\:ss"));
+        eb.WithTitle(TranslationManager.GetTranslations().PlayerDataPhrases.PlayerDetails + stats.LastNickname);
+        eb.AddField(TranslationManager.GetTranslations().PlayerDataPhrases.SteamID, stats.SteamID);
+        eb.AddField(TranslationManager.GetTranslations().PlayerDataPhrases.FirstSeen, stats.FirstSeen.ToString("dd-MM-yyyy") + " at " + stats.FirstSeen.ToString("hh\\:mm\\:ss"));
+        eb.AddField(TranslationManager.GetTranslations().PlayerDataPhrases.LastSeen, stats.LastSeen.ToString("dd-MM-yyyy") + " at " + stats.LastSeen.ToString("hh\\:mm\\:ss"));
         if (stats.Usernames.Count > 0)
         {
             string NameStr = "```";
             NameStr += string.Join("\n", stats.Usernames);
             NameStr += "```";
-            eb.AddField($"{TranslationManager.GetTranslations().OldNames} ({stats.Usernames.Count})", NameStr);
+            eb.AddField($"{TranslationManager.GetTranslations().PlayerDataPhrases.OldNames} ({stats.Usernames.Count})", NameStr);
         }
         if (stats.PFlags.Count > 0)
         {
@@ -53,17 +54,17 @@ internal class CommandGetPlayerStats : CommandBase
                 FlagsStr += f.IssueTime.ToString("dd-MM-yyyy") + " at " + f.IssueTime.ToString("hh\\:mm\\:ss") + "\n";
             }
             FlagsStr += "```";
-            eb.AddField($"{TranslationManager.GetTranslations().Flags} ({stats.PFlags.Count})", FlagsStr);
+            eb.AddField($"{TranslationManager.GetTranslations().PlayerDataPhrases.Flags} ({stats.PFlags.Count})", FlagsStr);
         }
         TimeSpan t = TimeSpan.FromSeconds(stats.PlayTime);
         string answer = string.Format("{0:D2}h {1:D2}m {2:D2}s",
                         t.Hours + (t.Days * 24),
                         t.Minutes,
                         t.Seconds);
-        eb.AddField(TranslationManager.GetTranslations().PlayTime, answer);
+        eb.AddField(TranslationManager.GetTranslations().PlayerDataPhrases.PlayTime, answer);
         if (stats.LoginAmount != 0)
         {
-            eb.AddField(TranslationManager.GetTranslations().Logins, stats.LoginAmount.ToString());
+            eb.AddField(TranslationManager.GetTranslations().PlayerDataPhrases.Logins, stats.LoginAmount.ToString());
         }
         if (stats.TimeOnline != 0)
         {
@@ -72,7 +73,7 @@ internal class CommandGetPlayerStats : CommandBase
                             t1.Hours + (t1.Days * 24),
                             t1.Minutes,
                             t1.Seconds);
-            eb.AddField(TranslationManager.GetTranslations().TimeOnline, answer1);
+            eb.AddField(TranslationManager.GetTranslations().PlayerDataPhrases.TimeOnline, answer1);
         }
         eb.WithCurrentTimestamp();
         Embed embed = eb.Build();

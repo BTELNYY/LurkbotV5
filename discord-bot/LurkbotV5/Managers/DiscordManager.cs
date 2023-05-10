@@ -23,6 +23,8 @@ namespace LurkbotV5
 
         public static Dictionary<ulong, string> LastMessageCache = new();
 
+        public static List<ulong> DoNotNotifyGhostPingCache = new();
+
         public static DiscordConfig DiscordConfig { get; private set; }
 
         public static LevelRoles LevelRoles { get; private set; }
@@ -36,90 +38,10 @@ namespace LurkbotV5
         {
             Client = client;
         }
-
         public void SetBotStatus(string message)
         {
             GetBot().GetClient().SetActivityAsync(new Game(message));
         }
-
-        public Task OnGhostPinging(Cacheable<IMessage, ulong> msg, Cacheable<IMessageChannel, ulong> channel)
-        {
-            Log.WriteDebug("OnGhostPing event triggered");
-            if (msg.Value == null)
-            {
-                Log.WriteWarning("OnGhostPing msg is null!");
-            }
-            if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
-            {
-                return Task.CompletedTask;
-            }
-            if (msg.Value.MentionedUserIds.Count > 0)
-            {
-                if (msg.Value.MentionedUserIds.Count == 1 && (msg.Value.MentionedUserIds.First() == msg.Value.Author.Id || msg.Value.MentionedUserIds.Contains(GetBot().GetClient().CurrentUser.Id)))
-                {
-                    return Task.CompletedTask;
-                }
-                //has ghost pings
-                string message = "";
-                foreach (ulong id in msg.Value.MentionedUserIds)
-                {
-                    if (id == GetBot().GetClient().CurrentUser.Id)
-                    {
-                        continue;
-                    }
-                    message += ("<@" + id.ToString() + ">");
-                    message += " ";
-                }
-                Log.WriteDebug("Mentioned: " + msg.Value.MentionedUserIds.Count);
-                EmbedBuilder eb = new();
-                eb.WithTitle("uh oh, you're getting ghost pinged!");
-                eb.WithCurrentTimestamp();
-                eb.AddField("Content", msg.Value.Content);
-                eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
-                eb.Color = Color.Blue;
-                channel.Value.SendMessageAsync(message, embed: eb.Build());
-            }
-            return Task.CompletedTask;
-        }
-
-        public Task OnMessageDeleted(Cacheable<IMessage, ulong> msg, Cacheable<IMessageChannel, ulong> channel)
-        {
-            if (msg.Value == null)
-            {
-                Log.WriteWarning("OnGhostPing msg is null!");
-            }
-            if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
-            {
-                return Task.CompletedTask;
-            }
-            var channel1 = GetBot().GetClient().GetChannel(GetBot().GetConfig().DeletedMessagesChannelID) as ITextChannel;
-            if (channel1 == null)
-            {
-                Log.WriteFatal("Channel not found! " + GetBot().GetConfig().DeletedMessagesChannelID);
-                return Task.CompletedTask;
-            }
-            Log.WriteDebug("Channel obtained");
-            EmbedBuilder eb = new();
-            eb.WithTitle("Deleted Message");
-            eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
-            eb.AddField("Channel", "<#" + channel.Id + ">");
-            eb.AddField("Content (text) ", msg.Value.Content);
-            if (msg.Value.Embeds.Count > 0)
-            {
-                Embed[] embeds = { eb.Build() };
-                foreach (var embed in msg.Value.Embeds)
-                {
-                    embeds.Append(embed);
-                }
-                channel1.SendMessageAsync(embeds: embeds);
-            }
-            else
-            {
-                channel1.SendMessageAsync(embed: eb.Build());
-            }
-            return Task.CompletedTask;
-        }
-
         public void EventInit()
         {
             Client.SlashCommandExecuted += SlashCommandHandler;
@@ -129,7 +51,6 @@ namespace LurkbotV5
             Client.UserJoined += OnUserJoin;
             Client.UserBanned += OnUserBanned;
         }
-
         public void DiscordConfigInit()
         {
             string guildid = GetBot().GetConfig().GuildID.ToString();
@@ -157,7 +78,6 @@ namespace LurkbotV5
                 File.WriteAllText(ServerConfigPath + "level_roles.json", json);
             }
         }
-
         public void CommandInit()
         {
             BuildCommand(new CommandGetPlayerStats());
@@ -166,14 +86,22 @@ namespace LurkbotV5
             BuildCommand(new CommandPlayers());
             BuildCommand(new CommandRank());
             BuildCommand(new CommandDestroyAppCommands());
+            BuildCommand(new CommandLeaderboard());
+            BuildCommand(new CommandLockdown());
+            BuildCommand(new CommandTimeout());
+            BuildCommand(new CommandAddLevelRole());
+            BuildCommand(new CommandRemoveLevelRole());
+            BuildCommand(new CommandParseUsers());
+            BuildCommand(new CommandChannelMute());
+            BuildCommand(new CommandPurge());
+            BuildCommand(new CommandBackupChannel());
+            BuildCommand(new CommandKickUser());
         }
-
         public void RepeatTaskInit()
         {
             Log.WriteInfo("Starting Repeating Task");
             Task.Run(() => UpdateTask());
         }
-
         async Task UpdateTask()
         {
             Log.WriteInfo("Updating Embeds");
@@ -184,7 +112,6 @@ namespace LurkbotV5
                 await Task.Delay(1000 * (int)GetBot().GetConfig().RefreshCooldown);
             }
         }
-
         async void UpdateEmbed()
         {
             Configuration config = GetBot().GetConfig();
@@ -270,12 +197,10 @@ namespace LurkbotV5
             }
             SetBotStatus("with " + response.value[0].Servers[0].PlayersList.Length.ToString() + " players! See server-status for more!");
         }
-
         public void SetBot(Bot bot)
         {
             Bot = bot;
         }
-
         public Bot GetBot()
         {
             if (Bot == null)
@@ -288,7 +213,6 @@ namespace LurkbotV5
                 return Bot;
             }
         }
-
         public void BuildCommand(CommandBase command)
         {
             DiscordSocketClient client = Client;
@@ -342,7 +266,6 @@ namespace LurkbotV5
                 Log.WriteError("Failed to build command: " + command.CommandName + "\n Error: \n " + exception.ToString());
             }
         }
-
         public static Task SlashCommandHandler(SocketSlashCommand command)
         {
             if (!Commands.ContainsKey(command.CommandName))
@@ -365,9 +288,6 @@ namespace LurkbotV5
             }
             return Task.CompletedTask;
         }
-
-
-
         public void DestroyAllAppCommands()
         {
             var commands = GetBot().GetClient().GetGlobalApplicationCommandsAsync();
@@ -516,6 +436,105 @@ namespace LurkbotV5
             }
             return Task.CompletedTask;
         }
+        public Task OnGhostPinging(Cacheable<IMessage, ulong> msg, Cacheable<IMessageChannel, ulong> channel)
+        {
+            Log.WriteDebug("OnGhostPing event triggered");
+            if (msg.Value == null)
+            {
+                Log.WriteWarning("OnGhostPing msg is null!");
+            }
+            if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
+            {
+                return Task.CompletedTask;
+            }
+            if (DoNotNotifyGhostPingCache.Contains(msg.Value.Id))
+            {
+                return Task.CompletedTask;
+            }
+            if (msg.Value.MentionedUserIds.Count > 0)
+            {
+                if (msg.Value.MentionedUserIds.Count == 1 && (msg.Value.MentionedUserIds.First() == msg.Value.Author.Id || msg.Value.MentionedUserIds.Contains(GetBot().GetClient().CurrentUser.Id)))
+                {
+                    return Task.CompletedTask;
+                }
+                //has ghost pings
+                string message = "";
+                foreach (ulong id in msg.Value.MentionedUserIds)
+                {
+                    if (id == GetBot().GetClient().CurrentUser.Id)
+                    {
+                        continue;
+                    }
+                    message += ("<@" + id.ToString() + ">");
+                    message += " ";
+                }
+                Log.WriteDebug("Mentioned: " + msg.Value.MentionedUserIds.Count);
+                EmbedBuilder eb = new();
+                eb.WithTitle("uh oh, you're getting ghost pinged!");
+                eb.WithCurrentTimestamp();
+                eb.AddField("Content", msg.Value.Content);
+                eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
+                eb.Color = Color.Blue;
+                channel.Value.SendMessageAsync(message, embed: eb.Build());
+            }
+            return Task.CompletedTask;
+        }
+        public Task OnMessageDeleted(Cacheable<IMessage, ulong> msg, Cacheable<IMessageChannel, ulong> channel)
+        {
+            if (msg.Value == null)
+            {
+                Log.WriteWarning("OnMessageDeleted msg is null!");
+                return Task.CompletedTask;
+            }
+            if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
+            {
+                return Task.CompletedTask;
+            }
+            var channel1 = GetBot().GetClient().GetChannel(GetBot().GetConfig().DeletedMessagesChannelID) as ITextChannel;
+            if (channel1 == null)
+            {
+                Log.WriteFatal("Channel not found! " + GetBot().GetConfig().DeletedMessagesChannelID);
+                return Task.CompletedTask;
+            }
+
+            EmbedBuilder eb = new();
+            eb.WithTitle("Deleted Message");
+            eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
+            eb.AddField("Channel", "<#" + channel.Id + ">");
+            if (msg.Value.Content != null || !string.IsNullOrEmpty(msg.Value.Content))
+            {
+                if(msg.Value.Content.Length > 0)
+                {
+                    eb.AddField("Content (text)", msg.Value.Content);
+                }
+            }
+            if (msg.Value.Attachments.Count > 0)
+            {
+                string atturls = "";
+                foreach (var att in msg.Value.Attachments)
+                {
+                    string attachmentparsed = att.Url.Replace("media", "cdn").Replace("net", "com");
+                    Log.WriteDebug(attachmentparsed);
+                    Log.WriteDebug(att.Url);
+                    if(att == msg.Value.Attachments.Last())
+                    {
+                        atturls += attachmentparsed;
+                    }
+                    else
+                    {
+                        atturls += attachmentparsed + "\n";
+                    }
+                }
+                eb.AddField("Attachments", atturls);
+                Embed[] embeds = { eb.Build() };
+                channel1.SendMessageAsync(embeds: embeds);
+            }
+            else
+            {
+                channel1.SendMessageAsync(embed: eb.Build());
+            }
+            return Task.CompletedTask;
+        }
 
         #region Rank and UserConfig
         public static bool AddLevelRole(uint level, ulong roleid, RoleLevelActions action)
@@ -581,6 +600,10 @@ namespace LurkbotV5
                     return false;
                 }
             }
+        }
+        public static bool RoleLevelExists(uint value)
+        {
+            return LevelRoles.RoleLevels.ContainsKey(value);
         }
         public static DiscordUserConfig GetUserConfig(ulong UserID)
         {

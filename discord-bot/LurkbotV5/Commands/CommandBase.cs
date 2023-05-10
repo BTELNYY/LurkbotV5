@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Sockets;
 
 namespace LurkbotV5.Commands
 {
@@ -31,6 +32,31 @@ namespace LurkbotV5.Commands
         public virtual void BuildOptions()
         {
 
+        }
+
+        public virtual SocketSlashCommandDataOption[] GetOptionsOrdered(List<SocketSlashCommandDataOption> options)
+        {
+            SocketSlashCommandDataOption[] array = new SocketSlashCommandDataOption[Options.Count];
+            foreach (var option in options)
+            {
+                int counter = 0;
+                foreach (var optionbase in Options)
+                {
+                    if(optionbase != null)
+                    {
+                        if(optionbase.Name == option.Name)
+                        {
+                            if (array[counter] != null)
+                            {
+                                Log.WriteError("Command options have been duplicated.");
+                            }
+                            array[counter] = option;
+                        }
+                    }
+                    counter++;
+                }
+            }
+            return array;
         }
     }
 

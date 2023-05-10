@@ -20,7 +20,6 @@ pub fn wrap_to_i64(x: u64) -> i64 {
 pub struct Flag {
     pub flag: i64,
     pub issuer: String,
-    #[serde(with = "time::serde::rfc3339")]
     pub issued_at: time::OffsetDateTime,
     pub comment: String,
 }
