@@ -64,52 +64,56 @@ async fn update_player(
     refresh: u64,
     old_plr_list: Vec<Player>,
 ) {
-    let raw_player = player.clone();
+    
+
+    // identify id
+
     let mut id_parts = player.id.split("@");
-    let id = id_parts.next();
-    if let None = id {
+    let raw_id = id_parts.next();
+    let identif = id_parts.next();
+    if raw_id.is_none() || identif.is_none() {
         eprintln!("Invalid player id: {}", player.id);
         return;
     }
-    let raw_id = id.unwrap();
-    let id = raw_id.clone();
-    let id = if player.id.ends_with("northwood") {
-        let mut hasher = std::collections::hash_map::DefaultHasher::new();
-        hasher.write(id.as_bytes());
-        hasher.finish()
-    } else {
-        id.parse::<u64>().expect("Unable to parse id")
+    let raw_id = raw_id.unwrap();
+    let identif = identif.unwrap();
+
+    let (id, nick) = match identif {
+        "steam" => {
+            (raw_id.parse::<u64>().expect("steam player to have valid u64 id"), player.nickname.clone().expect("Steam player to have nickname"))
+        },
+        "northwood" => {
+            let mut hasher = std::collections::hash_map::DefaultHasher::new();
+            hasher.write(raw_id.as_bytes());
+            (hasher.finish(), raw_id.to_string())
+        }
+        _ => {
+            eprintln!("Invalid indicator: {}", identif);
+            return;
+        }
     };
-    let nick = if !raw_id.ends_with("northwood") {
-        player
-            .nickname
-            .clone()
-            .expect("Non-northwood player has no nickname")
-    } else {
-        let mut nick_parts = player.id.split("@");
-        nick_parts.next().expect("Invalid nickname").to_string()
-    };
+
     println!("{}: {}", id, nick);
     if (db.has_player(id).await).unwrap_or(false) {
         // update the player
         println!("Updating player: {} ({})", nick, id);
-        let mut player = db.get_player(id).await.unwrap();
-        if player.last_nickname != nick {
-            player.nicknames.push(nick.clone());
+        let mut dbplayer = db.get_player(id).await.unwrap();
+        if dbplayer.last_nickname != nick {
+            dbplayer.nicknames.push(nick.clone());
         }
-        player.last_nickname = nick;
-        player.last_seen = time::OffsetDateTime::now_utc();
-        player.play_time = player.play_time + time::Duration::seconds(refresh as i64);
-        if !old_plr_list.iter().any(|e| e.id == raw_player.id) {
+        dbplayer.last_nickname = nick;
+        dbplayer.last_seen = time::OffsetDateTime::now_utc();
+        dbplayer.play_time = dbplayer.play_time + time::Duration::seconds(refresh as i64);
+        if !old_plr_list.iter().any(|e| e.id == player.id) {
             // this player just logged in
-            player.time_online = time::Duration::seconds(refresh as i64);
-            player.login_amt += 1;
+            dbplayer.time_online = time::Duration::seconds(refresh as i64);
+            dbplayer.login_amt += 1;
         } else {
-            player.time_online = player.time_online + time::Duration::seconds(refresh as i64);
+            dbplayer.time_online = dbplayer.time_online + time::Duration::seconds(refresh as i64);
         }
         //player.time_online = player.time_online + time::Duration::seconds(refresh as i64);
         //player.login_amt += 1;
-        db.update_player(player).await.unwrap();
+        db.update_player(dbplayer).await.unwrap();
     } else {
         // add the player!
         println!("Adding player: {} ({})", nick, id);
