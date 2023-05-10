@@ -64,8 +64,6 @@ async fn update_player(
     refresh: u64,
     old_plr_list: Vec<Player>,
 ) {
-    
-
     // identify id
 
     let mut id_parts = player.id.split("@");
@@ -79,9 +77,15 @@ async fn update_player(
     let identif = identif.unwrap();
 
     let (id, nick) = match identif {
-        "steam" => {
-            (raw_id.parse::<u64>().expect("steam player to have valid u64 id"), player.nickname.clone().expect("Steam player to have nickname"))
-        },
+        "steam" => (
+            raw_id
+                .parse::<u64>()
+                .expect("steam player to have valid u64 id"),
+            player
+                .nickname
+                .clone()
+                .expect("Steam player to have nickname"),
+        ),
         "northwood" => {
             let mut hasher = std::collections::hash_map::DefaultHasher::new();
             hasher.write(raw_id.as_bytes());
