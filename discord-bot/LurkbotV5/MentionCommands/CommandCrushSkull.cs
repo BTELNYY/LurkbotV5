@@ -12,7 +12,7 @@ namespace LurkbotV5.MentionCommands
 {
     public class CommandCrushSkull : MentionCommandBase
     {
-        public override string Command => "crush his skull";
+        public override string Command => "crush his skull, thank you";
         public override GuildPermission Permission => GuildPermission.MuteMembers;
 
         public async override void Execute(MentionCommandParams param)

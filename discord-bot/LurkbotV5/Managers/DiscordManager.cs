@@ -11,6 +11,7 @@ using System.Diagnostics.Metrics;
 using LurkbotV5.Managers;
 using System.Security.Cryptography.X509Certificates;
 using LurkbotV5.BaseClasses;
+using LurkbotV5.MentionCommands;
 using System.Net.WebSockets;
 
 namespace LurkbotV5
@@ -100,6 +101,7 @@ namespace LurkbotV5
             BuildCommand(new CommandPurge());
             BuildCommand(new CommandBackupChannel());
             BuildCommand(new CommandKickUser());
+            BuildCommand(new CommandCrushSkull());
         }
         public void RepeatTaskInit()
         {
