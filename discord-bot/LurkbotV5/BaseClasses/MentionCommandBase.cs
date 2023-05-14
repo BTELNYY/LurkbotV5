@@ -22,7 +22,7 @@ namespace LurkbotV5.BaseClasses
     public struct MentionCommandParams
     {
         public SocketGuildUser User { get; private set; }
-        public SocketMessageChannel Channel { get; private set; }
+        public ISocketMessageChannel Channel { get; private set; }
         public SocketMessage Message { get; private set; }
         public SocketGuild Guild { get; private set; }
         public string MessageContent { get; private set; }
