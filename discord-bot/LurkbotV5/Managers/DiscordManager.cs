@@ -279,28 +279,33 @@ namespace LurkbotV5
             {
                 Log.WriteError("Failed to add MentionCommand to dict. Command: " + command.Command.ToLower());
             }
+            Log.WriteDebug(MentionCommands.Count.ToString());
         }
         public Task OnMentionCommand(SocketMessage msg)
         {
             if (!msg.MentionedUsers.Contains(GetBot().GetClient().CurrentUser))
             {
+                Log.WriteDebug("Message does not mention bot, aborting...");
                 return Task.CompletedTask;
             }
             List<string> parts = msg.Content.Split(" ").ToList();
             if(parts[0] != $"<@{GetBot().GetClient().CurrentUser.Id}>")
             {
+                Log.WriteDebug("Bot isnt mentioned in the first part of the message, aborting...");
                 return Task.CompletedTask;
             }
             parts.RemoveAt(0);
             string command = string.Join(" ", parts);
             if (!MentionCommands.ContainsKey(command))
             {
+                Log.WriteDebug("Can't find command, aborting....");
                 msg.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.NoSuchCommand, messageReference: msg.Reference);
                 return Task.CompletedTask;
             }
             MentionCommandBase commandBase = MentionCommands[command];
             if (msg.Channel is SocketDMChannel)
             {
+                Log.WriteDebug("DM command, cant reply. Aborting....");
                 msg.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.DMChannelDisabled, messageReference: msg.Reference);
                 return Task.CompletedTask;
             }
@@ -317,9 +322,11 @@ namespace LurkbotV5
             }
             if(!allowed)
             {
+                Log.WriteDebug("Invalid permissions, aborting...");
                 msg.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.InvalidPermissions, messageReference: msg.Reference);
                 return Task.CompletedTask;
             }
+            Log.WriteDebug("Executing....");
             MentionCommandParams param = new MentionCommandParams(sender, (ISocketMessageChannel) channel, msg, guild, command);
             Task.Run(() =>
             {
