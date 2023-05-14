@@ -27,7 +27,7 @@ namespace LurkbotV5.BaseClasses
         public SocketGuild Guild { get; private set; }
         public string MessageContent { get; private set; }
 
-        public MentionCommandParams(SocketGuildUser user, SocketGuildChannel channel, SocketMessage message, SocketGuild guild, string messagecontent)
+        public MentionCommandParams(SocketGuildUser user, ISocketMessageChannel channel, SocketMessage message, SocketGuild guild, string messagecontent)
         {
             User = user;
             Channel = channel;

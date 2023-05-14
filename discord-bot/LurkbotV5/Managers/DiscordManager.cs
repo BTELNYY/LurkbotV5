@@ -320,7 +320,7 @@ namespace LurkbotV5
                 msg.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.InvalidPermissions, messageReference: msg.Reference);
                 return Task.CompletedTask;
             }
-            MentionCommandParams param = new MentionCommandParams(sender, channel, msg, guild, command);
+            MentionCommandParams param = new MentionCommandParams(sender, (ISocketMessageChannel) channel, msg, guild, command);
             Task.Run(() =>
             {
                 commandBase.Execute(param);
