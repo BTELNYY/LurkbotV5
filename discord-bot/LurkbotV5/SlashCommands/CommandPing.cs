@@ -1,7 +1,8 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using LurkbotV5.BaseClasses;
 
-namespace LurkbotV5.Commands;
+namespace LurkbotV5.SlashCommands;
 internal class CommandPing : CommandBase
 {
     public override string CommandName => "ping";

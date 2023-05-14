@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 
-namespace LurkbotV5.Commands
+namespace LurkbotV5.BaseClasses
 {
     public class CommandBase
     {
@@ -42,9 +42,9 @@ namespace LurkbotV5.Commands
                 int counter = 0;
                 foreach (var optionbase in Options)
                 {
-                    if(optionbase != null)
+                    if (optionbase != null)
                     {
-                        if(optionbase.Name == option.Name)
+                        if (optionbase.Name == option.Name)
                         {
                             if (array[counter] != null)
                             {

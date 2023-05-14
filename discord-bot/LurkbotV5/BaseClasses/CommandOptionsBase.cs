@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LurkbotV5.Commands
+namespace LurkbotV5.BaseClasses
 {
     public class CommandOptionsBase
     {

@@ -1,4 +1,5 @@
 ﻿using btelnyy.ConfigLoader.API;
+using LurkbotV5.BaseClasses;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -174,8 +175,30 @@ namespace LurkbotV5.Managers
             public string UserKickedFromGuild = "You have been kicked from `{server}` for `{reason}` by `{author}`";
             public string UserBannedFromGuildNoAuthor = "You have been banned from `{server}` for `{reason}`";
             public string UserBannedFromGuild = "You have been banned from `{server}` for `{reason}` by `{author}`";
-
             public DirectMessage() { }
+        }
+
+        public MentionCommand MentionCommandPhrases = new();
+
+        public struct MentionCommand
+        {
+            public string NoSuchCommand = "No such mention command.";
+            public string InvalidPermissions = "Invalid permissions for mention command.";
+            public string ErrorInCommand = "Error running mention command.";
+            public string DMChannelDisabled = "Unable to use mention commands in DM channels.";
+            public MentionCommand() { }
+        }
+
+        public GenericError GenericErrorPhrases = new();
+
+        //For random errors
+        public struct GenericError
+        {
+            public string MustReplyToMessage = "You must reply to a message when using this command.";
+
+
+
+            public GenericError() { }
         }
 
         public Translations()

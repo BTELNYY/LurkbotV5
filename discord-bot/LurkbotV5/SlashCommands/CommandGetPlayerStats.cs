@@ -8,8 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using LurkbotV5;
 using LurkbotV5.Managers;
+using LurkbotV5.BaseClasses;
 
-namespace LurkbotV5.Commands;
+namespace LurkbotV5.SlashCommands;
 internal class CommandGetPlayerStats : CommandBase
 {
     public override string CommandName => "getplayerdetails";

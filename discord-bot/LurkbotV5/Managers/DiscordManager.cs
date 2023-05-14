@@ -6,10 +6,12 @@ using btelnyy.ConfigLoader.API;
 using Newtonsoft.Json;
 using Discord.Commands;
 using Discord.Net;
-using LurkbotV5.Commands;
+using LurkbotV5.SlashCommands;
 using System.Diagnostics.Metrics;
 using LurkbotV5.Managers;
 using System.Security.Cryptography.X509Certificates;
+using LurkbotV5.BaseClasses;
+using System.Net.WebSockets;
 
 namespace LurkbotV5
 {
@@ -29,6 +31,7 @@ namespace LurkbotV5
 
         public static LevelRoles LevelRoles { get; private set; }
         public static Dictionary<string, CommandBase> Commands { get; private set; } = new Dictionary<string, CommandBase>();
+        public static Dictionary<string, MentionCommandBase> MentionCommands { get; private set; } = new Dictionary<string, MentionCommandBase>();
 
         public static readonly string UserConfigPath = "./statistics/users/";
 
@@ -48,6 +51,7 @@ namespace LurkbotV5
             Client.MessageDeleted += OnMessageDeleted;
             Client.MessageDeleted += OnGhostPinging;
             Client.MessageReceived += LevelUpMessageEvent;
+            Client.MessageReceived += OnMentionCommand;
             Client.UserJoined += OnUserJoin;
             Client.UserBanned += OnUserBanned;
         }
@@ -265,6 +269,61 @@ namespace LurkbotV5
             {
                 Log.WriteError("Failed to build command: " + command.CommandName + "\n Error: \n " + exception.ToString());
             }
+        }
+        public void BuildCommand(MentionCommandBase command)
+        {
+            bool success = MentionCommands.TryAdd(command.Command.ToLower(), command);
+            if (!success)
+            {
+                Log.WriteError("Failed to add MentionCommand to dict. Command: " + command.Command.ToLower());
+            }
+        }
+        public Task OnMentionCommand(SocketMessage msg)
+        {
+            if (!msg.MentionedUsers.Contains(GetBot().GetClient().CurrentUser))
+            {
+                return Task.CompletedTask;
+            }
+            List<string> parts = msg.Content.Split(" ").ToList();
+            if(parts[0] != $"<@{GetBot().GetClient().CurrentUser.Id}>")
+            {
+                return Task.CompletedTask;
+            }
+            parts.RemoveAt(0);
+            string command = string.Join(" ", parts);
+            if (!MentionCommands.ContainsKey(command))
+            {
+                msg.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.NoSuchCommand, messageReference: msg.Reference);
+                return Task.CompletedTask;
+            }
+            MentionCommandBase commandBase = MentionCommands[command];
+            if (msg.Channel is SocketDMChannel)
+            {
+                msg.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.DMChannelDisabled, messageReference: msg.Reference);
+                return Task.CompletedTask;
+            }
+            SocketGuildUser sender = (SocketGuildUser) msg.Author;
+            SocketGuildChannel channel = (SocketGuildChannel)msg.Channel;
+            var guild = channel.Guild;
+            bool allowed = false;
+            foreach(var role in sender.Roles)
+            {
+                if (role.Permissions.Has(commandBase.Permission))
+                {
+                    allowed = true;
+                }
+            }
+            if(!allowed)
+            {
+                msg.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.InvalidPermissions, messageReference: msg.Reference);
+                return Task.CompletedTask;
+            }
+            MentionCommandParams param = new MentionCommandParams(sender, channel, msg, guild, command);
+            Task.Run(() =>
+            {
+                commandBase.Execute(param);
+            });
+            return Task.CompletedTask;
         }
         public static Task SlashCommandHandler(SocketSlashCommand command)
         {

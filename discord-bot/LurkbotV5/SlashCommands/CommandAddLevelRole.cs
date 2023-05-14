@@ -6,8 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LurkbotV5.Managers;
+using LurkbotV5.BaseClasses;
 
-namespace LurkbotV5.Commands
+namespace LurkbotV5.SlashCommands
 {
     public class CommandAddLevelRole : CommandBase
     {
