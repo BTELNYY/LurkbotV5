@@ -283,7 +283,8 @@ namespace LurkbotV5
         }
         public Task OnMentionCommand(SocketMessage msg)
         {
-            if (!msg.MentionedUsers.Contains(GetBot().GetClient().CurrentUser))
+            IMessage message = msg as IMessage;
+            if (message.MentionedUserIds.Contains(GetBot().GetClient().CurrentUser.Id))
             {
                 Log.WriteDebug("Message does not mention bot, aborting...");
                 return Task.CompletedTask;
