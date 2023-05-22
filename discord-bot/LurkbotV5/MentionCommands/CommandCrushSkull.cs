@@ -19,9 +19,10 @@ namespace LurkbotV5.MentionCommands
         {
             base.Execute(param);
             SocketMessage message = param.Message;
+            MessageReference reference = new MessageReference(message.Id, message.Channel.Id);
             if(message.Reference == null)
             {
-                await message.Channel.SendMessageAsync(TranslationManager.GetTranslations().GenericErrorPhrases.MustReplyToMessage, messageReference: message.Reference);
+                await message.Channel.SendMessageAsync(TranslationManager.GetTranslations().GenericErrorPhrases.MustReplyToMessage, messageReference: reference);
                 return;
             }
             if(message.Reference.MessageId.IsSpecified) 
@@ -30,18 +31,18 @@ namespace LurkbotV5.MentionCommands
                 if(channel is null)
                 {
                     Log.WriteError("Reply channel is null.");
-                    await message.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.ErrorInCommand, messageReference: message.Reference);
+                    await message.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.ErrorInCommand, messageReference: reference);
                     return;
                 }
                 var target = channel.GetMessageAsync(message.Reference.MessageId.Value).Result.Author as SocketGuildUser;
                 if(target is null)
                 {
                     Log.WriteError("Target is null.");
-                    await message.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.ErrorInCommand, messageReference: message.Reference);
+                    await message.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.ErrorInCommand, messageReference: reference);
                     return;
                 }
                 await target.SetTimeOutAsync(TimeSpan.FromSeconds(120));
-                await message.Channel.SendMessageAsync(TranslationManager.GetTranslations().TimeoutPhrases.UserTimedOut.Replace("{user}", target.Username), messageReference: message.Reference);
+                await message.Channel.SendMessageAsync(TranslationManager.GetTranslations().TimeoutPhrases.UserTimedOut.Replace("{user}", target.Username), messageReference: reference);
             }
         }
     }
