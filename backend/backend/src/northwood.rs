@@ -47,7 +47,7 @@ impl SlServer {
     }
     pub async fn get(&self) -> Result<SLResponse, anyhow::Error> {
         let resp = reqwest::get(self.api_url()).await?.text().await?;
-        //println!("{}", resp);
+        println!("{}", resp);
         let resp: serde_json::Value = serde_json::from_str(&resp)?;
         if resp["Success"].as_bool().unwrap_or(false) {
             let resp: SLResponse = serde_json::from_value(resp)?;

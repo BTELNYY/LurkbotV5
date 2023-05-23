@@ -250,6 +250,7 @@ namespace LurkbotV5.Managers
 
     public struct ServerResponse
     {
+        public bool Success;
         public int Cooldown;
         public Server[] Servers;
     }
