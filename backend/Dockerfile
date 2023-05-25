@@ -18,7 +18,7 @@ RUN cargo build --release
 FROM debian:buster-slim AS runtime
 WORKDIR /app
 RUN apt-get update && apt-get install -y libssl-dev openssl libssl1.1 curl ca-certificates
-COPY --from=builder /app/target/release/backend /usr/local/bin/backend
+COPY --from=builder /app/target/release/lurky_api /usr/local/bin/backend
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s CMD curl --fail http://localhost:8000/health || exit 1   
 

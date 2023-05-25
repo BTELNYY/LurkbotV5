@@ -1,0 +1,15 @@
+[package]
+name = "northwood_api"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11.18", features = ["json"] }
+serde = { version = "1.0.163", features = ["derive"] }
+tracing = "0.1.37"
+lurky_common ={ path="../lurky_common" }
+serde_json = "1.0.96"
+futures = "0.3.28"
+siphasher = "0.3"
