@@ -144,6 +144,7 @@ namespace LurkbotV5
                     else
                     {
                         name = "[Missing Server Name]";
+                        continue;
                     }
                     var embed = new EmbedBuilder
                     {

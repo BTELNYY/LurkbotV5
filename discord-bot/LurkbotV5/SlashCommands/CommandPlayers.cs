@@ -34,6 +34,7 @@ internal class CommandPlayers : CommandBase
                 else
                 {
                     name = "[Missing Server Name]";
+                    continue;
                 }
                 eb.AddField(name, s.PlayersList.Length);
             }
