@@ -1,12 +1,10 @@
 use std::{
     collections::HashMap,
-    error::Error,
     fmt::Debug,
     hash::Hash,
     io::{BufRead, BufReader, Read},
-    ops::{Range, RangeBounds},
+    ops::{Range},
     process::exit,
-    str::FromStr,
 };
 
 // Btelnyy config format!!
@@ -17,7 +15,7 @@ pub struct RawConfig {
     offsets: HashMap<String, usize>,
 }
 
-use anyhow::{anyhow, Context};
+use anyhow::{anyhow};
 impl RawConfig {
     pub fn parse<T: Read>(file: T) -> Result<Self, anyhow::Error> {
         let mut data = HashMap::new();
