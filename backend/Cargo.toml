@@ -1,5 +1,5 @@
 [workspace]
-members = ["backend", "migrate", "lurky", "BCF"]
+members = ["lurky_api", "lurky_common", "lurky_db", "northwood_api", "bcf"]
 
 [profile.dev.package."*"]
 # Set the default for dependencies in Development mode.
