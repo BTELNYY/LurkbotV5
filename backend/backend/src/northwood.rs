@@ -15,6 +15,7 @@ pub struct SLServer {
     pub id: u64,
     pub port: u16,
     pub online: bool,
+    #[serde(default)]
     pub players_list: Vec<Player>,
 }
 

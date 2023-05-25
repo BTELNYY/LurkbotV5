@@ -42,6 +42,9 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
             if let Ok(resp) = resp {
                 CACHED_NW_REQ.write()[id] = Some(resp.clone());
                 for server in resp.servers {
+                    if !server.online {
+                        continue;
+                    }
                     player_list.extend(server.players_list)
                 }
             }
