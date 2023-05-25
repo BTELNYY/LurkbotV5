@@ -2,8 +2,8 @@ use std::{error::Error, hash::Hasher};
 
 use lurky_common::LurkyError;
 use serde::{Deserialize, Serialize};
-use tracing::{debug, instrument};
-use siphasher::sip::{SipHasher13};
+use siphasher::sip::SipHasher13;
+use tracing::{debug, error, instrument};
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct SLResponse {
@@ -53,7 +53,7 @@ impl Player {
                 let id = self.id.split("@").next().ok_or_else(|| {
                     LurkyError::InvalidPlayer(self.id.clone(), self.nickname.clone())
                 })?;
-                let mut hasher = SipHasher13::new_with_keys(0,0); // explicitly state siphasher13, this might reset northwood players but eh
+                let mut hasher = SipHasher13::new_with_keys(0, 0); // explicitly state siphasher13, this might reset northwood players but eh
                 hasher.write(id.as_bytes());
                 Ok(hasher.finish())
             }
@@ -100,18 +100,19 @@ impl SLServer {
     #[instrument]
     pub async fn fetch(&self) -> Result<SLResponse, Box<dyn Error>> {
         let resp = reqwest::get(self.api_url()).await?.text().await?;
-        debug!("{}", resp);
+        debug!("Api raw response: {}", resp);
         let resp: serde_json::Value = serde_json::from_str(&resp)?;
         if resp["Success"].as_bool().unwrap_or(false) {
             let resp: SLResponse = serde_json::from_value(resp)?;
+            debug!("Api Response: {:?}", resp);
             Ok(resp)
         } else {
-            Err(LurkyError::ApiError(
-                resp["Error"]
-                    .as_str()
-                    .unwrap_or("Unknown error")
-                    .to_string(),
-            ))?
+            let err_msg = resp["Error"]
+                .as_str()
+                .unwrap_or("Unknown error")
+                .to_string();
+            error!("Api Error: {}", err_msg);
+            Err(LurkyError::ApiError(err_msg))?
         }
     }
 }
