@@ -3,5 +3,8 @@ fn main() {
         "cargo:rustc-env=TARGET={}",
         std::env::var("TARGET").unwrap()
     );
-    println!("cargo:rustc-env=PROFILE={}", std::env::var("PROFILE").unwrap())
+    println!(
+        "cargo:rustc-env=PROFILE={}",
+        std::env::var("PROFILE").unwrap()
+    )
 }

@@ -1,12 +1,9 @@
-
 use axum::{response::IntoResponse, routing::get, Router};
 use hyper::{StatusCode, Uri};
-use lurky_common::tokio;
-use lurky_common::tracing;
-use lurky_common::tracing::info;
-use lurky_common::tracing::instrument;
+use tracing::info;
+use tracing::instrument;
 
-use tower_http::validate_request::{ValidateRequestHeaderLayer};
+use tower_http::validate_request::ValidateRequestHeaderLayer;
 
 use std::net::SocketAddr;
 use tower::ServiceBuilder;
@@ -34,7 +31,10 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(index))
-        .route("/auth", get(auth_test).layer(ValidateRequestHeaderLayer::bearer("gaming")))
+        .route(
+            "/auth",
+            get(auth_test).layer(ValidateRequestHeaderLayer::bearer("gaming")),
+        )
         .fallback(fallback)
         .layer(middleware);
 
