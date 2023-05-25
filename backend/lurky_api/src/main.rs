@@ -1,15 +1,15 @@
-use axum::response::Response;
+
 use axum::{response::IntoResponse, routing::get, Router};
 use hyper::{StatusCode, Uri};
 use lurky_common::tokio;
 use lurky_common::tracing;
 use lurky_common::tracing::info;
 use lurky_common::tracing::instrument;
-use tower_http::auth::require_authorization::Bearer;
-use tower_http::validate_request::{ValidateRequestHeader, ValidateRequestHeaderLayer};
+
+use tower_http::validate_request::{ValidateRequestHeaderLayer};
 
 use std::net::SocketAddr;
-use tower::{ServiceBuilder, Layer};
+use tower::ServiceBuilder;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
 #[tokio::main]
