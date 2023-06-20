@@ -517,6 +517,7 @@ namespace LurkbotV5
             if (msg.Value == null)
             {
                 Log.WriteWarning("OnGhostPing msg is null!");
+                return Task.CompletedTask;
             }
             if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
             {
@@ -895,8 +896,8 @@ namespace LurkbotV5
     #region Level Roles
     public struct LevelRoles
     {
-        public bool Enable;
-        public Dictionary<uint, List<RoleLevel>> RoleLevels;
+        public bool Enable = false;
+        public Dictionary<uint, List<RoleLevel>> RoleLevels = new();
         public LevelRoles(Dictionary<uint, List<RoleLevel>> RoleLevels, bool Enable = true)
         {
             this.RoleLevels = RoleLevels;
