@@ -300,6 +300,11 @@ namespace LurkbotV5
             string command = string.Join(" ", parts);
             if (!MentionCommands.ContainsKey(command))
             {
+                if(parts.Count <= 0)
+                {
+                    Log.WriteDebug("Empty ping brace, aborting...");
+                    return Task.CompletedTask;
+                }
                 Log.WriteDebug("Can't find command, aborting....");
                 msg.Channel.SendMessageAsync(TranslationManager.GetTranslations().MentionCommandPhrases.NoSuchCommand, messageReference: msg.Reference);
                 return Task.CompletedTask;
@@ -609,23 +614,28 @@ namespace LurkbotV5
         #region Rank and UserConfig
         public static bool AddLevelRole(uint level, ulong roleid, RoleLevelActions action)
         {
+            Log.WriteDebug($"Adding Level role. Level: {level} roleid: {roleid}, action: {action}");
             if (LevelRoles.RoleLevels.ContainsKey(level))
             {
                 if (LevelRoles.RoleLevels[level].Contains(new RoleLevel(roleid, action)))
                 {
+                    Log.WriteDebug("Role already exists.");
                     return false;
                 }
+                Log.WriteDebug("Role does not exist, adding....");
                 LevelRoles.RoleLevels[level].Add(new RoleLevel(roleid, action));
                 return true;
             }
             else
             {
-                List<RoleLevel> l = new();
-                l.Add(new RoleLevel(roleid, action));
-                LevelRoles.RoleLevels.Add(level, l);
+                List<RoleLevel> levelRoleList = new()
+                {
+                    new RoleLevel(roleid, action)
+                };
+                LevelRoles.RoleLevels.Add(level, levelRoleList);
                 try
                 {
-                    WriteConfig();
+                    WriteLevelRoleConfig();
                     return true;
                 }
                 catch
@@ -662,7 +672,7 @@ namespace LurkbotV5
                 }
                 try
                 {
-                    WriteConfig();
+                    WriteLevelRoleConfig();
                     return true;
                 }
                 catch
@@ -815,16 +825,19 @@ namespace LurkbotV5
             float result = ((xp / xp) - DiscordConfig.XPOffsetToAdd) / DiscordConfig.XPPerLevelMultiplier;
             return (uint)Math.Round((double)result, MidpointRounding.ToZero);
         }
-        private static void WriteConfig()
+        private static void WriteLevelRoleConfig()
         {
+            Log.WriteDebug("Writing Role Level Config!");
             if(File.Exists(ServerConfigPath + "role_levels.json"))
             {
+                Log.WriteDebug("Fille exists, deleting and recreating.");
                 File.Delete(ServerConfigPath + "role_levels.json");
                 string json = JsonConvert.SerializeObject(LevelRoles);
                 File.WriteAllText(ServerConfigPath + "role_levels.json", json);
             }
             else
             {
+                Log.WriteDebug("File does not exist, writing data.");
                 string json = JsonConvert.SerializeObject(LevelRoles);
                 File.WriteAllText(ServerConfigPath + "role_levels.json", json);
             }
@@ -850,7 +863,6 @@ namespace LurkbotV5
             this.LockXP = LockXP;
         }
     }
-
     public struct DiscordConfig
     {
         public bool XPEnabled;
@@ -901,7 +913,6 @@ namespace LurkbotV5
             this.Action = Action;
         }
     }
-
     public enum RoleLevelActions
     {
         ADD,
