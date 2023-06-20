@@ -16,7 +16,7 @@ namespace LurkbotV5
 
         public static async Task Main(string[] args)
         {
-            ConsoleThread.Start();
+            //ConsoleThread.Start();
             await new Program().MainAsync(args);
         }
 
