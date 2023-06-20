@@ -629,6 +629,7 @@ namespace LurkbotV5
             }
             else
             {
+                Log.WriteDebug("Role levels does not contain level.");
                 List<RoleLevel> levelRoleList = new()
                 {
                     new RoleLevel(roleid, action)
@@ -639,8 +640,9 @@ namespace LurkbotV5
                     WriteLevelRoleConfig();
                     return true;
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Log.WriteError("Failed to write config: " + ex.ToString());
                     return false;
                 }
             }

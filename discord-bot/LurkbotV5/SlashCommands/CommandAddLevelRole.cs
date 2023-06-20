@@ -31,7 +31,6 @@ namespace LurkbotV5.SlashCommands
             {
                 Log.WriteError("Error occured while parsing tag: \n" + ex.ToString());
                 await command.RespondAsync(TranslationManager.GetTranslations().LevelRolePhrases.GeneralFailure);
-                return;
             }
 
             DiscordManager.AddLevelRole((uint)level, RoleID, flag);
