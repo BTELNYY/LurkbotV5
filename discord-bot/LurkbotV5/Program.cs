@@ -12,11 +12,16 @@ namespace LurkbotV5
         public static string CustomPath = "";
         static Thread ConsoleThread = new(HandleConsole);
 
-        public static Task Main(string[] args) => new Program().MainAsync(args);
+        //public static Task Main(string[] args) => new Program().MainAsync(args);
+
+        public static async Task Main(string[] args)
+        {
+            ConsoleThread.Start();
+            await new Program().MainAsync(args);
+        }
 
         public async Task MainAsync(string[] args)
         {
-            ConsoleThread.Start();
             if (args.Contains("--config") && args.Length >= 2)
             {
                 CustomConfigPath = true;
@@ -41,7 +46,7 @@ namespace LurkbotV5
         public static void HandleConsole()
         {
             Log.WriteInfo("Started console!");
-            while(ConsoleThread.IsAlive)
+            while(true)
             {
                 string? input = Console.ReadLine();
                 if(string.IsNullOrEmpty(input))
