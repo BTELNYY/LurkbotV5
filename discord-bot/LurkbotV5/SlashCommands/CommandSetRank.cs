@@ -57,7 +57,8 @@ namespace LurkbotV5.SlashCommands
             {
                 Required = false,
                 OptionType = ApplicationCommandOptionType.Number,
-                Name = "XP amount"
+                Name = "xpamount",
+                Description = "XP Amount"
             };
             Options.Add(cop);
             Options.Add(cop1);
