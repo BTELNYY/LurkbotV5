@@ -76,17 +76,16 @@ namespace LurkbotV5
             {
                 string json = File.ReadAllText(ServerConfigPath + "level_roles.json");
                 LevelRoles levelRoles = JsonConvert.DeserializeObject<LevelRoles>(json);
-                if(levelRoles.RoleLevels == null)
-                {
-                    levelRoles.RoleLevels = new();  
-                }
+                levelRoles.RoleLevels ??= new();
                 LevelRoles = levelRoles;
+                WriteLevelRoleConfig();
             }
             else
             {
                 string json = JsonConvert.SerializeObject(new LevelRoles());
                 File.WriteAllText(ServerConfigPath + "level_roles.json", json);
                 LevelRoles = new();
+                WriteLevelRoleConfig();
             }
         }
         public void CommandInit()
