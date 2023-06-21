@@ -75,7 +75,12 @@ namespace LurkbotV5
             if (File.Exists(ServerConfigPath + "level_roles.json"))
             {
                 string json = File.ReadAllText(ServerConfigPath + "level_roles.json");
-                LevelRoles = JsonConvert.DeserializeObject<LevelRoles>(json);
+                LevelRoles levelRoles = JsonConvert.DeserializeObject<LevelRoles>(json);
+                if(levelRoles.RoleLevels == null)
+                {
+                    levelRoles.RoleLevels = new();  
+                }
+                LevelRoles = levelRoles;
             }
             else
             {
