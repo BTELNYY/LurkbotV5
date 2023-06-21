@@ -61,7 +61,7 @@ namespace LurkbotV5.SlashCommands
                 Required = false,
                 OptionType = ApplicationCommandOptionType.User,
                 Name = "user",
-                Description = "The Discord ID of the user you want to modify the XP of. (right click on user and copy ID)"
+                Description = "The Discord ID of the user you want to get the XP of. (right click on user and copy ID)"
             };
             Options.Add(cop);
         }
