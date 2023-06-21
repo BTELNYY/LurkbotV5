@@ -836,18 +836,18 @@ namespace LurkbotV5
         private static void WriteLevelRoleConfig()
         {
             Log.WriteDebug("Writing Role Level Config!");
-            if(File.Exists(ServerConfigPath + "role_levels.json"))
+            if(File.Exists(ServerConfigPath + "level_roles.json"))
             {
                 Log.WriteDebug("Fille exists, deleting and recreating.");
-                File.Delete(ServerConfigPath + "role_levels.json");
+                File.Delete(ServerConfigPath + "level_roles.json");
                 string json = JsonConvert.SerializeObject(LevelRoles);
-                File.WriteAllText(ServerConfigPath + "role_levels.json", json);
+                File.WriteAllText(ServerConfigPath + "level_roles.json", json);
             }
             else
             {
                 Log.WriteDebug("File does not exist, writing data.");
                 string json = JsonConvert.SerializeObject(LevelRoles);
-                File.WriteAllText(ServerConfigPath + "role_levels.json", json);
+                File.WriteAllText(ServerConfigPath + "level_roles.json", json);
             }
         }
 
