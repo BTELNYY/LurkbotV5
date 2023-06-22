@@ -12,7 +12,7 @@ namespace LurkbotV5.Managers
 {
     public static class TranslationManager
     {
-        public static readonly string DefaultTranslations = "en-us.txt";
+        public static readonly string DefaultTranslations = "en-us.json";
         public static Translations Translations { get; private set; }
 
         private static string Path = "./translations/";

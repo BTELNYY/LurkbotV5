@@ -56,12 +56,12 @@ namespace LurkbotV5.SlashCommands
             }
             if(hideauthor)
             {
-                await command.RespondAsync(embed: eb.Build());
+                await command.RespondAsync(TranslationManager.GetTranslations().GenericPhrases.Acknowledged, ephemeral: true);
+                await command.Channel.SendMessageAsync(embed: eb.Build());
             }
             else
             {
-                await command.RespondAsync(TranslationManager.GetTranslations().GenericPhrases.Acknowledged, ephemeral: true);
-                await command.Channel.SendMessageAsync(embed: eb.Build());
+                await command.RespondAsync(embed: eb.Build());
             }
         }
 

@@ -34,9 +34,9 @@ namespace LurkbotV5
         public static Dictionary<string, CommandBase> Commands { get; private set; } = new Dictionary<string, CommandBase>();
         public static Dictionary<string, MentionCommandBase> MentionCommands { get; private set; } = new Dictionary<string, MentionCommandBase>();
 
-        public static readonly string UserConfigPath = "./statistics/users/";
+        public static readonly string UserConfigPath = "./data/users/";
 
-        public static readonly string ServerConfigPath = $"./statistics/server/{Bot.Instance.GetConfig().GuildID}/";
+        public static readonly string ServerConfigPath = $"./data/server/{Bot.Instance.GetConfig().GuildID}/";
 
         public DiscordManager(DiscordSocketClient client)
         {
@@ -108,107 +108,12 @@ namespace LurkbotV5
             BuildCommand(new CommandKickUser());
             BuildCommand(new CommandCrushSkull());
             BuildCommand(new CommandSetRank());
+            BuildCommand(new CommandSetNameExclude());
         }
         public void RepeatTaskInit()
         {
             Log.WriteInfo("Starting Repeating Task");
-            Task.Run(() => UpdateTask());
-        }
-        async Task UpdateTask()
-        {
-            Log.WriteInfo("Updating Embeds");
-            while (true)
-            {
-                UpdateEmbed();
-                Log.WriteInfo("Updated Embed, waiting " + GetBot().GetConfig().RefreshCooldown + "s");
-                await Task.Delay(1000 * (int)GetBot().GetConfig().RefreshCooldown);
-            }
-        }
-        async void UpdateEmbed()
-        {
-            Configuration config = GetBot().GetConfig();
-            ulong guildid = config.GuildID;
-            ulong channelid = config.UpdateChannelID;
-            NWAllResponse response = APIManager.GetServerStatus(GetBot().GetConfig().AuthKey);
-
-            if (response.value.Count() == 0)
-            {
-                Log.WriteError("Failed to fetch servers: server count is 0");
-                return;
-            }
-            List<Embed> embeds = new List<Embed>();
-            foreach (ServerResponse s in response.value)
-            {
-                Log.WriteDebug("Creating embeds");
-                foreach (Server s1 in s.Servers)
-                {
-                    string name = "";
-                    if (GetBot().GetConfig().ServerNames.ContainsKey(s1.ID.ToString()))
-                    {
-                        name = GetBot().GetConfig().ServerNames[s1.ID.ToString()];
-                    }
-                    else
-                    {
-                        name = "[Missing Server Name]";
-                        continue;
-                    }
-                    var embed = new EmbedBuilder
-                    {
-                        Title = name
-                    };
-                    embed.WithDescription("Players currently online:\n```\n" + string.Join("\n", s1.GetPlayerNames()) + "```")
-                        .WithCurrentTimestamp()
-                        .WithColor(Color.Green)
-                        .AddField("Players online", s1.PlayersList.Length);
-                    Log.WriteDebug("Embed created");
-                    embeds.Add(embed.Build());
-                }
-            }
-            var channel = GetBot().GetClient().GetChannel(GetBot().GetConfig().UpdateChannelID) as ITextChannel;
-            if (channel == null)
-            {
-                Log.WriteFatal("Channel not found! " + GetBot().GetConfig().UpdateChannelID);
-                return;
-            }
-            Log.WriteDebug("Channel obtained");
-            var meses = await channel.GetMessagesAsync().FlattenAsync();
-            Log.WriteDebug("Messages obtained");
-            if (meses == null)
-            {
-                Log.WriteWarning("No messages, cringe");
-                await channel.SendMessageAsync(embeds: embeds.ToArray());
-                return;
-            }
-            Log.WriteDebug("Searching for messages from bot");
-            var botMes = meses.Where((message => message.Author.Id == GetBot().GetClient().CurrentUser.Id));
-            Log.WriteDebug("Getting first bot message");
-            if (!botMes.Any())
-            {
-                Log.WriteWarning("No messages, cringe");
-                await channel.SendMessageAsync(embeds: embeds.ToArray());
-                return;
-            }
-            var messagetoEdit = botMes.First();
-            Log.WriteDebug("Checking dat shit");
-            if (messagetoEdit == null)
-            {
-                // create new message
-                Log.WriteDebug("Create new message");
-                await channel.SendMessageAsync(embeds: embeds.ToArray());
-            }
-            else
-            {
-                // edit message
-                Log.WriteDebug("Edit message");
-                var mestoEdituser = messagetoEdit as IUserMessage;
-                if (mestoEdituser == null)
-                {
-                    Log.WriteFatal("not a IUserMessage");
-                    return;
-                }
-                await mestoEdituser.ModifyAsync(properties => { properties.Embeds = embeds.ToArray(); });
-            }
-            SetBotStatus("with " + response.value[0].Servers[0].PlayersList.Length.ToString() + " players! See server-status for more!");
+            Task.Run(() => ServerListEmbedManager.UpdateTask());
         }
         public void SetBot(Bot bot)
         {
