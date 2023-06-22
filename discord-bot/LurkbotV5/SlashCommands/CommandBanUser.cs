@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace LurkbotV5.SlashCommands
 {
-    public class CommandKickUser : CommandBase
+    public class CommandBanUser : CommandBase
     {
-        public override string CommandName => "kickuser";
-        public override string Description => "kick a user from this server.";
-        public override GuildPermission RequiredPermission => GuildPermission.KickMembers;
+        public override string CommandName => "banuser";
+        public override string Description => "ban a user from this server. (this command does not delete recent messages)";
+        public override GuildPermission RequiredPermission => GuildPermission.BanMembers;
         public override async void Execute(SocketSlashCommand command)
         {
             base.Execute(command);
@@ -29,7 +29,7 @@ namespace LurkbotV5.SlashCommands
                 {
                     if (hideauthor && command.GuildId != null)
                     {
-                        await user.SendMessageAsync(TranslationManager.GetTranslations().DirectMessagePhrases.UserKickedFromGuildNoAuthor.Replace("{server}", Bot.Instance.GetClient().GetGuild((ulong)command.GuildId).Name).Replace("{reason}", reason));
+                        await user.SendMessageAsync(TranslationManager.GetTranslations().DirectMessagePhrases.UserBannedFromGuildNoAuthor.Replace("{server}", Bot.Instance.GetClient().GetGuild((ulong)command.GuildId).Name).Replace("{reason}", reason));
                     }
                     else
                     {
@@ -37,7 +37,7 @@ namespace LurkbotV5.SlashCommands
                     {
                         return;
                     }
-                    await user.SendMessageAsync(TranslationManager.GetTranslations().DirectMessagePhrases.UserKickedFromGuildNoAuthor.Replace("{server}", Bot.Instance.GetClient().GetGuild((ulong)command.GuildId).Name).Replace("{reason}", reason).Replace("{author}", command.User.Username + "#" + command.User.Discriminator));
+                    await user.SendMessageAsync(TranslationManager.GetTranslations().DirectMessagePhrases.UserBannedFromGuildNoAuthor.Replace("{server}", Bot.Instance.GetClient().GetGuild((ulong)command.GuildId).Name).Replace("{reason}", reason).Replace("{author}", command.User.Username + "#" + command.User.Discriminator));
                     }
                 }
             }
@@ -47,7 +47,7 @@ namespace LurkbotV5.SlashCommands
             }
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithCurrentTimestamp();
-            eb.WithTitle(TranslationManager.GetTranslations().ModerationPhrases.UserKicked.Replace("{user}", user.Username + "#" + user.Discriminator));
+            eb.WithTitle(TranslationManager.GetTranslations().ModerationPhrases.UserBanned.Replace("{user}", user.Username + "#" + user.Discriminator));
             eb.AddField(TranslationManager.GetTranslations().GenericPhrases.ReasonField, reason);
             if (!hideauthor)
             {
@@ -62,7 +62,7 @@ namespace LurkbotV5.SlashCommands
             {
                 await command.RespondAsync(embed: eb.Build());
             }
-            await user.KickAsync(reason);
+            await user.BanAsync(0, reason);
         }
 
         public override void BuildOptions()
@@ -71,28 +71,28 @@ namespace LurkbotV5.SlashCommands
             CommandOptionsBase cob = new CommandOptionsBase()
             {
                 Name = "user",
-                Description = "User which to kick",
+                Description = "User which to ban",
                 OptionType = ApplicationCommandOptionType.User,
                 Required = true,
             };
             CommandOptionsBase cob1 = new CommandOptionsBase()
             {
                 Name = "reason",
-                Description = "Reason for being kicked",
+                Description = "Reason for being banned",
                 OptionType = ApplicationCommandOptionType.String,
                 Required = true
             };
             CommandOptionsBase cob2 = new CommandOptionsBase()
             {
                 Name = "senddm",
-                Description = "Should the bot message the kicked user?",
+                Description = "Should the bot message the banned user?",
                 OptionType = ApplicationCommandOptionType.Boolean,
                 Required = true
             };
             CommandOptionsBase cob3 = new CommandOptionsBase() 
             {
                 Name = "hideauthor",
-                Description = "Should the bot hide that you kicked this user?",
+                Description = "Should the bot hide that you banned this user?",
                 OptionType = ApplicationCommandOptionType.Boolean,
                 Required = true
             };
