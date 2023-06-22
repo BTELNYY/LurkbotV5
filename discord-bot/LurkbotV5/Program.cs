@@ -35,12 +35,12 @@ namespace LurkbotV5
             Configuration config = new();
             DiscordSocketClient client = new(cfg);
             DiscordManager discordManager = new(client);
-            ServerListEmbedManager.LoadData();
             APIManager.Init();
             Bot bot = new(config, client, discordManager);
             discordManager.SetBot(bot);
             bot.StartBot();
             TranslationManager.Init();
+            ServerListEmbedManager.LoadData();
             await Task.Delay(-1);
         }
 
