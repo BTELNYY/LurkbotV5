@@ -119,7 +119,7 @@ async fn update_player(
         dbplayer.last_seen = time::OffsetDateTime::now_utc();
         if alone_players_copy.contains(&player.id)
         {
-            println("Player is alone, not adding time");
+            println!("Player is alone, not adding time");
         }
         else
         {
