@@ -48,7 +48,7 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
                     }
                     if server.players_list.len() == 1
                     {
-                        println("Player is alone, pushing to alone_players");
+                        println!("Player is alone, pushing to alone_players");
                         alone_players.push(server.players_list[0].id.clone());
                     }
                     player_list.extend(server.players_list);
