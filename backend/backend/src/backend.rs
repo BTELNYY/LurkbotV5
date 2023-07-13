@@ -13,8 +13,8 @@ use std::{hash::Hasher, sync::Arc, time::Duration};
 lazy_static! {
     pub static ref CACHED_NW_REQ: RwLock<Vec<Option<SLResponse>>> = RwLock::new(Vec::new());
 }
-unsafe
-{
+
+unsafe {
     pub static mut alone_players: Vec<String> = vec![];
 }
 
