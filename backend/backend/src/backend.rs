@@ -14,10 +14,6 @@ lazy_static! {
     pub static ref CACHED_NW_REQ: RwLock<Vec<Option<SLResponse>>> = RwLock::new(Vec::new());
 }
 
-unsafe {
-    pub static mut alone_players: Vec<String> = vec![];
-}
-
 /// this function runs in a seperate thread, it really shouldnt return
 pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
     let refresh = conf.refresh_cooldown;
@@ -35,6 +31,7 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
     let mut intv = rocket::tokio::time::interval(Duration::from_secs(refresh));
     intv.set_missed_tick_behavior(rocket::tokio::time::MissedTickBehavior::Delay);
     let mut old_plr_list: Vec<Player> = vec![];
+    let mut alone_players: Vec<String> = vec![];
     loop {
         // do shit
         intv.tick().await;
@@ -62,7 +59,7 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
         join_all(
             player_list
                 .iter()
-                .map(|e| update_player(e, Arc::clone(&db), refresh, old_plr_list.clone())),
+                .map(|e| update_player(e, Arc::clone(&db), refresh, old_plr_list.clone(), alone_players.clone())),
         )
         .await;
         old_plr_list = player_list;
@@ -74,6 +71,7 @@ async fn update_player(
     db: Arc<ManagedDB>,
     refresh: u64,
     old_plr_list: Vec<Player>,
+    alone_players_copy: Vec<String>
 ) {
     // identify id
 
@@ -121,7 +119,7 @@ async fn update_player(
         dbplayer.play_time = dbplayer.play_time + time::Duration::seconds(refresh as i64);
         if !old_plr_list.iter().any(|e| e.id == player.id) {
             // this player just logged in
-            if alone_players.contains(&player.id)
+            if alone_players_copy.contains(&player.id)
             {
                 
             }
@@ -131,7 +129,7 @@ async fn update_player(
             }
             dbplayer.login_amt += 1;
         } else {
-            if alone_players.contains(&player.id)
+            if alone_players_copy.contains(&player.id)
             {
                 
             }
