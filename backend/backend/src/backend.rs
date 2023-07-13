@@ -14,6 +14,8 @@ lazy_static! {
     pub static ref CACHED_NW_REQ: RwLock<Vec<Option<SLResponse>>> = RwLock::new(Vec::new());
 }
 
+pub mut alone_players: Vec<String> = vec![];
+
 /// this function runs in a seperate thread, it really shouldnt return
 pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
     let refresh = conf.refresh_cooldown;
@@ -31,7 +33,6 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
     let mut intv = rocket::tokio::time::interval(Duration::from_secs(refresh));
     intv.set_missed_tick_behavior(rocket::tokio::time::MissedTickBehavior::Delay);
     let mut old_plr_list: Vec<Player> = vec![];
-    let mut alone_players: Vec<String> = vec![];
     loop {
         // do shit
         intv.tick().await;
