@@ -1,4 +1,3 @@
-use backend::backend;
 use lurky::config::LurkyConfig;
 use rocket::http::ContentType;
 use rocket::tokio::spawn;

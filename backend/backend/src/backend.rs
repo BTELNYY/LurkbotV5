@@ -14,7 +14,7 @@ lazy_static! {
     pub static ref CACHED_NW_REQ: RwLock<Vec<Option<SLResponse>>> = RwLock::new(Vec::new());
 }
 
-pub mut alone_players: Vec<String> = vec![];
+pub static alone_players: Vec<String> = vec![];
 
 /// this function runs in a seperate thread, it really shouldnt return
 pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
