@@ -48,6 +48,7 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
                     }
                     if server.players_list.len() == 1
                     {
+                        println("Player is alone, pushing to alone_players");
                         alone_players.push(server.players_list[0].id.clone());
                     }
                     player_list.extend(server.players_list);
@@ -116,27 +117,20 @@ async fn update_player(
         }
         dbplayer.last_nickname = nick;
         dbplayer.last_seen = time::OffsetDateTime::now_utc();
-        dbplayer.play_time = dbplayer.play_time + time::Duration::seconds(refresh as i64);
+        if alone_players_copy.contains(&player.id)
+        {
+            println("Player is alone, not adding time");
+        }
+        else
+        {
+            dbplayer.play_time = dbplayer.play_time + time::Duration::seconds(refresh as i64);
+        }
         if !old_plr_list.iter().any(|e| e.id == player.id) {
             // this player just logged in
-            if alone_players_copy.contains(&player.id)
-            {
-                
-            }
-            else
-            {
-                dbplayer.time_online = time::Duration::seconds(refresh as i64);
-            }
+            dbplayer.time_online = time::Duration::seconds(refresh as i64);
             dbplayer.login_amt += 1;
         } else {
-            if alone_players_copy.contains(&player.id)
-            {
-                
-            }
-            else
-            {
-                dbplayer.time_online = dbplayer.time_online + time::Duration::seconds(refresh as i64);
-            }
+            dbplayer.time_online = dbplayer.time_online + time::Duration::seconds(refresh as i64);
         }
         //player.time_online = player.time_online + time::Duration::seconds(refresh as i64);
         //player.login_amt += 1;
