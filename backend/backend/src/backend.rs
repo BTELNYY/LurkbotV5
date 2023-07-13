@@ -31,6 +31,7 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
     let mut intv = rocket::tokio::time::interval(Duration::from_secs(refresh));
     intv.set_missed_tick_behavior(rocket::tokio::time::MissedTickBehavior::Delay);
     let mut old_plr_list: Vec<Player> = vec![];
+    let mut alone_players: Vec<String> = vec![];
     loop {
         // do shit
         intv.tick().await;
@@ -45,7 +46,11 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
                     if !server.online {
                         continue;
                     }
-                    player_list.extend(server.players_list)
+                    if server.players_list.count() == 1
+                    {
+                        alone_players.push(server.player_list[0].id);
+                    }
+                    player_list.extend(server.players_list);
                 }
             }
         }
@@ -113,10 +118,24 @@ async fn update_player(
         dbplayer.play_time = dbplayer.play_time + time::Duration::seconds(refresh as i64);
         if !old_plr_list.iter().any(|e| e.id == player.id) {
             // this player just logged in
-            dbplayer.time_online = time::Duration::seconds(refresh as i64);
+            if alone_players.contains(dbplayer.id)
+            {
+                
+            }
+            else
+            {
+                dbplayer.time_online = time::Duration::seconds(refresh as i64);
+            }
             dbplayer.login_amt += 1;
         } else {
-            dbplayer.time_online = dbplayer.time_online + time::Duration::seconds(refresh as i64);
+            if alone_players.contains(dbplayer.id)
+            {
+
+            }
+            else
+            {
+                dbplayer.time_online = dbplayer.time_online + time::Duration::seconds(refresh as i64);
+            }
         }
         //player.time_online = player.time_online + time::Duration::seconds(refresh as i64);
         //player.login_amt += 1;

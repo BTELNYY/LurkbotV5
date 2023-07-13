@@ -632,9 +632,9 @@ namespace LurkbotV5
             string userpath = UserConfigPath + config.UserID.ToString() + ".json";
             File.WriteAllText(userpath, JsonConvert.SerializeObject(config));
         }
-        public void DeleteUserConfig(ulong id, ulong guildid)
+        public static void DeleteUserConfig(ulong id, ulong guildid)
         {
-            if (guildid == GetBot().GetConfig().GuildID)
+            if (guildid == Bot.Instance.GetConfig().GuildID)
             {
                 try
                 {
