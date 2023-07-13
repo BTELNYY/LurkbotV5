@@ -13,8 +13,10 @@ use std::{hash::Hasher, sync::Arc, time::Duration};
 lazy_static! {
     pub static ref CACHED_NW_REQ: RwLock<Vec<Option<SLResponse>>> = RwLock::new(Vec::new());
 }
-
-pub static mut alone_players: Vec<String> = vec![];
+unsafe
+{
+    pub static mut alone_players: Vec<String> = vec![];
+}
 
 /// this function runs in a seperate thread, it really shouldnt return
 pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
