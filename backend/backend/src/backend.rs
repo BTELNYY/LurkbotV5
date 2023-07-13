@@ -47,9 +47,9 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
                     if !server.online {
                         continue;
                     }
-                    if server.players_list.count() == 1
+                    if server.players_list.len() == 1
                     {
-                        alone_players.push(server.player_list[0].id);
+                        alone_players.push(server.players_list[0].id);
                     }
                     player_list.extend(server.players_list);
                 }
@@ -119,7 +119,7 @@ async fn update_player(
         dbplayer.play_time = dbplayer.play_time + time::Duration::seconds(refresh as i64);
         if !old_plr_list.iter().any(|e| e.id == player.id) {
             // this player just logged in
-            if alone_players.contains(dbplayer.id)
+            if alone_players.contains(player.id)
             {
                 
             }
@@ -129,9 +129,9 @@ async fn update_player(
             }
             dbplayer.login_amt += 1;
         } else {
-            if alone_players.contains(dbplayer.id)
+            if alone_players.contains(player.id)
             {
-
+                
             }
             else
             {

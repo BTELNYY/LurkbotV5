@@ -54,7 +54,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut db = db::create_db_from_config(&config)?;
     db.setup().await?;
     let db = Arc::new(db);
-    let backend_thread = spawn(backend(Arc::clone(&config), Arc::clone(&db)));
+    let backend_thread = spawn(backend::backend(Arc::clone(&config), Arc::clone(&db)));
     let _rocket = rocket::build()
         .register("/", catchers![default_error_catcher])
         .mount("/", routes::basics::routes())
