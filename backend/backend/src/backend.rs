@@ -64,6 +64,7 @@ pub async fn backend(conf: Arc<LurkyConfig>, db: Arc<ManagedDB>) {
         )
         .await;
         old_plr_list = player_list;
+        alone_players.clear();
     }
 }
 
@@ -75,7 +76,6 @@ async fn update_player(
     alone_players_copy: Vec<String>
 ) {
     // identify id
-
     let mut id_parts = player.id.split("@");
     let raw_id = id_parts.next();
     let identif = id_parts.next();
@@ -117,6 +117,7 @@ async fn update_player(
         }
         dbplayer.last_nickname = nick;
         dbplayer.last_seen = time::OffsetDateTime::now_utc();
+        //try checking for if the player is alone
         if alone_players_copy.contains(&player.id)
         {
             println!("Player is alone, not adding time");

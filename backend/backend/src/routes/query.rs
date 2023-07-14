@@ -2,7 +2,7 @@ use std::{str::FromStr, sync::Arc};
 
 use crate::db::ManagedDB;
 use lurky::query::{Operator, Query, Restriction};
-use rocket::{get, response::status::NotFound, routes, serde::json::Json, Route, State};
+use rocket::{get, response::status::NotFound, routes, serde::json::Json, Route, State, post};
 use serde::Serialize;
 use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 
@@ -167,6 +167,37 @@ pub async fn query_db(
     }
 }
 
+//first_seen = $2, last_seen = $3, play_time = $4, last_nickname = $5, nicknames = $6, flags = $7, time_online = $8, login_amt
+
+// #[post("/modifyplayer?id?field?value")]
+// pub fn modify_db_player(
+//     id: String,
+//     field: String,
+//     value: String
+// ) -> String {
+//     if !valid_keys().contains(&field)
+//     {
+        
+//     }
+//     return "default!".to_string();
+// }
+
+// pub fn valid_keys() -> Vec<String>
+// {
+//     keys![
+//         "first_seen",
+//         "last_seen",
+//         "play_time",
+//         "last_nickname",
+//         "nicknames",
+//         "flags",
+//         "time_online",
+//         "login_amt"
+//     ]
+// }
+
+
+
 #[get("/random?<flags>&<login_amt>&<play_time>&<time_online>&<first_seen>&<last_seen>")]
 pub async fn query_db_random(
     flags: Option<String>,
@@ -214,6 +245,7 @@ pub fn routes() -> Vec<Route> {
         query_by_name,
         query_db,
         query_db_random,
-        leaderboard
+        leaderboard,
+        //modify_db_player
     ]
 }
