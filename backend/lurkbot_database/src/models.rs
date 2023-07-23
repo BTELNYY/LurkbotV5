@@ -60,7 +60,8 @@ impl From<LurkiePlayer> for Lurkie {
             last_seen: todo!("Last seen offset -> primitive"),
             play_time: value.play_time.whole_seconds(),
             last_nickname: value.last_nickname,
-            nicknames: serde_json::to_string(&value.nicknames).expect("Failed to serialize nicknames"),
+            nicknames: serde_json::to_string(&value.nicknames)
+                .expect("Failed to serialize nicknames"),
             flags: serde_json::to_string(&value.flags).expect("Failed to serialize flags"),
             time_online: value.time_online.whole_seconds(),
             login_amt: wrap_to_i64(value.login_amt),

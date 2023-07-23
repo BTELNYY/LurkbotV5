@@ -1,7 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use tokio::select;
-use tracing::{instrument, info};
+use tracing::{info, instrument};
 
 use crate::Config;
 #[instrument]

@@ -1,6 +1,9 @@
-use std::{collections::HashMap, error::Error, path::PathBuf, process::ExitCode, sync::Arc, net::SocketAddr};
+use std::{
+    collections::HashMap, error::Error, net::SocketAddr, path::PathBuf, process::ExitCode,
+    sync::Arc,
+};
 
-use axum::{Router, routing::get};
+use axum::{routing::get, Router};
 use clap::Parser;
 use lurkbot_common::*;
 use tracing::{debug, error, info, instrument};
@@ -82,11 +85,10 @@ async fn lb() -> Result<(), LurkbotError> {
     let config = Arc::new(Config::parse(config_text)?);
     info!("Config loaded successfully!");
     tokio::spawn(backend_task::backend_task(Arc::clone(&config)));
-    
-    // construct app 
 
-    let app = Router::new()
-        .route("/", get(home));
+    // construct app
+
+    let app = Router::new().route("/", get(home));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     tracing::debug!("listening on {}", addr);
@@ -94,12 +96,14 @@ async fn lb() -> Result<(), LurkbotError> {
         .serve(app.into_make_service())
         .await
         .map_err(|e| LurkbotError::ServerError(format!("{}", e)))
-
 }
 
-
 async fn home() -> &'static str {
-    concat!("Lurkbot backend v",env!("CARGO_PKG_VERSION")," is running!")
+    concat!(
+        "Lurkbot backend v",
+        env!("CARGO_PKG_VERSION"),
+        " is running!"
+    )
 }
 
 #[derive(Debug)]
