@@ -1,0 +1,15 @@
+[package]
+name = "lurkbot_backend"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = "0.6.19"
+clap = { version = "4.3.19", features = ["derive"] }
+lurkbot_common = { path = "../lurkbot_common" }
+lurkbot_database = { path = "../lurkbot_database" }
+tokio = { version = "1.29.1", features = ["full"] }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"

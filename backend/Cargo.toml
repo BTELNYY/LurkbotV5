@@ -1,5 +1,5 @@
 [workspace]
-members = ["backend", "migrate", "lurky", "BCF"]
+members = ["lurkbot_common", "lurkbot_backend", "lurkbot_database", "lurkbot_northwood"]
 
 [profile.dev.package."*"]
 # Set the default for dependencies in Development mode.
