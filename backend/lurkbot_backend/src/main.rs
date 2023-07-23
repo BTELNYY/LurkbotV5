@@ -1,12 +1,12 @@
 use std::{
-    collections::HashMap, error::Error, net::SocketAddr, path::PathBuf, process::ExitCode,
+    collections::HashMap, net::SocketAddr, path::PathBuf, process::ExitCode,
     sync::Arc,
 };
 
 use axum::{routing::get, Router};
 use clap::Parser;
 use lurkbot_common::*;
-use tracing::{debug, error, info, instrument};
+use tracing::{error, info, instrument};
 mod backend_task;
 #[derive(Parser)]
 struct CommandLineArgs {

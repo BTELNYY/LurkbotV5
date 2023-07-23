@@ -1,8 +1,8 @@
 use std::error::Error;
-use std::f32::consts::PI;
+
 
 use deadpool_diesel::sqlite::{Manager, Pool};
-use lurkbot_common::*;
+
 pub mod models;
 pub mod schema;
 pub struct Database {
