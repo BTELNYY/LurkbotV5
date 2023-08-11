@@ -112,6 +112,9 @@ namespace LurkbotV5
             BuildCommand(new CommandSetRank());
             BuildCommand(new CommandSetNameExclude());
             BuildCommand(new CommandBanUser());
+            BuildCommand(new CommandAddWarning());
+            BuildCommand(new CommandGetWarnings());
+            BuildCommand(new CommandRemoveWarning());
         }
         public void RepeatTaskInit()
         {
