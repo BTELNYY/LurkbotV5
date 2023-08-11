@@ -15,9 +15,10 @@ namespace LurkbotV5.SlashCommands
         public override string CommandName => "resetwarnings";
         public override string Description => "Reset Warnings";
         public override GuildPermission RequiredPermission => GuildPermission.Administrator;
-        public override void Execute(SocketSlashCommand command)
+        public override async void Execute(SocketSlashCommand command)
         {
             base.Execute(command);
+            await command.RespondAsync("Resetting warnings!");
             int counter = 0;
             int errorCounter = 0;
             foreach (string file in Directory.EnumerateFiles(DiscordManager.UserConfigPath))
@@ -35,7 +36,7 @@ namespace LurkbotV5.SlashCommands
                 }
                 counter++;
             }
-            command.RespondAsync($"Done! Files Parsed: {counter}, Errors: {errorCounter}");
+            await command.Channel.SendMessageAsync($"Done! Files Parsed: {counter}, Errors: {errorCounter}");
         }
     }
 }
