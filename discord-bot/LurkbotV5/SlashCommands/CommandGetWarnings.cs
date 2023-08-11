@@ -15,7 +15,6 @@ namespace LurkbotV5.SlashCommands
         public override string CommandName => "getwarnings";
         public override GuildPermission RequiredPermission => base.RequiredPermission;
         public override string Description => "Get users warnings";
-        public override List<CommandOptionsBase> Options => new();
         public override async void Execute(SocketSlashCommand command)
         {
             base.Execute(command);

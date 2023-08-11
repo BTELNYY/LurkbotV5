@@ -15,7 +15,6 @@ namespace LurkbotV5.SlashCommands
         public override string CommandName => "removewarning";
         public override GuildPermission RequiredPermission => GuildPermission.MuteMembers;
         public override string Description => "Remove warning from user";
-        public override List<CommandOptionsBase> Options => new();
         public override async void Execute(SocketSlashCommand command)
         {
             base.Execute(command);
