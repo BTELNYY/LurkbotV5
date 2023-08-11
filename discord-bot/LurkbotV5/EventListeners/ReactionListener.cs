@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace LurkbotV5.EventListeners
 {
-    internal class ReactionListener
+    public class ReactionListener
     {
+
     }
 }

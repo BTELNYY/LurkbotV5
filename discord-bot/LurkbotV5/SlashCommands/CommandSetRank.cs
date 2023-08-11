@@ -32,7 +32,7 @@ namespace LurkbotV5.SlashCommands
             DiscordUserConfig cfg = DiscordManager.GetUserConfig(user.Id);
             cfg.XP = (float)xp;
             cfg.XPLevel = (uint)level;
-            DiscordManager.SetUserConfig(cfg);
+            DiscordManager.WriteUserConfig(cfg);
             command.RespondAsync(TranslationManager.GetTranslations().GenericPhrases.Success);
         }
 

@@ -65,11 +65,23 @@ namespace LurkbotV5.Managers
         {
             public string UserKicked = "{user} was kicked";
             public string UserBanned = "{user} was banned";
+            public string UserWarned = "{user} was warned";
 
             public Moderation() { }
         }
 
+        public Warnings WarningsPhrases = new();
 
+        public struct Warnings
+        {
+            public string WarningsTitle = "User Warnings";
+            public string TotalWarningsField = "Total";
+            public string WarningsField = "Warnings";
+            public string NoWarningOnId = "No warning for requested warning ID!";
+            public string WarningRemoved = "Warning removed";
+
+            public Warnings() { }
+        }
 
         //playerdata
         public PlayerData PlayerDataPhrases = new();
@@ -138,12 +150,8 @@ namespace LurkbotV5.Managers
             public string SuccessRemovingLevelRole = "Removed level role with no issues.";
             public string ParsingUsers = "Parsing users and assigning roles as needed....";
             public string DoneParse = "Parse Complete.";
-            
 
-            public LevelRole()
-            {
-
-            }
+            public LevelRole() { }
         }
 
         public Timeout TimeoutPhrases = new();
@@ -152,8 +160,6 @@ namespace LurkbotV5.Managers
         {
             public string UserTimedOut = "{user} was timed out.";
             public string DurationTooShort = "You must specify a longer timeout duration.";
-
-
             public Timeout() { }
         }
 
@@ -175,6 +181,7 @@ namespace LurkbotV5.Managers
             public string UserKickedFromGuild = "You have been kicked from `{server}` for `{reason}` by `{author}`";
             public string UserBannedFromGuildNoAuthor = "You have been banned from `{server}` for `{reason}`";
             public string UserBannedFromGuild = "You have been banned from `{server}` for `{reason}` by `{author}`";
+            public string UserWarnedInGuild = "You have been warned in `{server}` for `{reason}` by `{author}`";
             public DirectMessage() { }
         }
 
@@ -195,9 +202,6 @@ namespace LurkbotV5.Managers
         public struct GenericError
         {
             public string MustReplyToMessage = "You must reply to a message when using this command.";
-
-
-
             public GenericError() { }
         }
 

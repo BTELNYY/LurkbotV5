@@ -13,6 +13,8 @@ using System.Security.Cryptography.X509Certificates;
 using LurkbotV5.BaseClasses;
 using LurkbotV5.MentionCommands;
 using System.Net.WebSockets;
+using LurkbotV5.EventListeners;
+using System.Data.Common;
 
 namespace LurkbotV5
 {
@@ -49,12 +51,12 @@ namespace LurkbotV5
         public void EventInit()
         {
             Client.SlashCommandExecuted += SlashCommandHandler;
-            Client.MessageDeleted += OnMessageDeleted;
-            Client.MessageDeleted += OnGhostPinging;
+            Client.MessageDeleted += MessageListener.OnMessageDeleted;
+            Client.MessageDeleted += MessageListener.OnGhostPinging;
             Client.MessageReceived += LevelUpMessageEvent;
             Client.MessageReceived += OnMentionCommand;
-            Client.UserJoined += OnUserJoin;
-            Client.UserBanned += OnUserBanned;
+            Client.UserJoined += UserHandler.OnUserJoin;
+            Client.UserBanned += UserHandler.OnUserBanned;
         }
         public void DiscordConfigInit()
         {
@@ -185,6 +187,7 @@ namespace LurkbotV5
                 Log.WriteError("Failed to build command: " + command.CommandName + "\n Error: \n " + exception.ToString());
             }
         }
+
         public void BuildCommand(MentionCommandBase command)
         {
             bool success = MentionCommands.TryAdd(command.Command.ToLower(), command);
@@ -194,6 +197,7 @@ namespace LurkbotV5
             }
             Log.WriteDebug(MentionCommands.Count.ToString());
         }
+
         public Task OnMentionCommand(SocketMessage msg)
         {
             IMessage message = msg as IMessage;
@@ -253,6 +257,7 @@ namespace LurkbotV5
             });
             return Task.CompletedTask;
         }
+
         public static Task SlashCommandHandler(SocketSlashCommand command)
         {
             if (!Commands.ContainsKey(command.CommandName))
@@ -275,6 +280,7 @@ namespace LurkbotV5
             }
             return Task.CompletedTask;
         }
+
         public void DestroyAllAppCommands()
         {
             var commands = GetBot().GetClient().GetGlobalApplicationCommandsAsync();
@@ -285,6 +291,7 @@ namespace LurkbotV5
                 thing.DeleteAsync().Wait();
             }
         }
+
         public Task LevelUpMessageEvent(SocketMessage msg)
         {
             if (GetBot().GetConfig().DisableNonSLCommands)
@@ -348,7 +355,7 @@ namespace LurkbotV5
                 }
                 DiscordConfig.XPLevels.Add(level, requiredXP);
                 Log.WriteDebug("Setting XP level to dict..");
-                SetUserConfig(cfg);
+                WriteUserConfig(cfg);
                 if (!levelIncreased)
                 {
                     return Task.CompletedTask;
@@ -378,148 +385,6 @@ namespace LurkbotV5
                         return Task.CompletedTask;
                     }
                 }
-            }
-            return Task.CompletedTask;
-        }
-        public Task OnUserBanned(SocketUser user, SocketGuild guild)
-        {
-            DeleteUserConfig(user.Id, guild.Id);
-            return Task.CompletedTask;
-        }
-        public Task OnUserJoin(SocketGuildUser user)
-        {
-            ulong id = user.Id;
-            DiscordUserConfig config = GetUserConfig(id);
-            foreach (uint level in LevelRoles.RoleLevels.Keys)
-            {
-                foreach (RoleLevel role in LevelRoles.RoleLevels[level])
-                {
-                    if (config.XPLevel < level)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        if (role.Action == RoleLevelActions.REMOVE)
-                        {
-                            SocketGuild guild = Bot.Instance.GetClient().GetGuild(Bot.Instance.GetConfig().GuildID);
-                            SocketRole grole = guild.GetRole(role.RoleID);
-                            if (user != null && user.Roles.Contains(grole))
-                            {
-                                user.RemoveRoleAsync(grole);
-                            }
-                        }
-                        else if (role.Action == RoleLevelActions.ADD)
-                        {
-                            SocketGuild guild = Bot.Instance.GetClient().GetGuild(Bot.Instance.GetConfig().GuildID);
-                            SocketRole grole = guild.GetRole(role.RoleID);
-                            if (user != null && grole != null && !user.Roles.Contains(grole))
-                            {
-                                user.AddRoleAsync(grole);
-                            }
-                        }
-                    }
-                }
-            }
-            return Task.CompletedTask;
-        }
-        public Task OnGhostPinging(Cacheable<IMessage, ulong> msg, Cacheable<IMessageChannel, ulong> channel)
-        {
-            Log.WriteDebug("OnGhostPing event triggered");
-            if (msg.Value == null)
-            {
-                Log.WriteWarning("OnGhostPing msg is null!");
-                return Task.CompletedTask;
-            }
-            if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
-            {
-                return Task.CompletedTask;
-            }
-            if (DoNotNotifyGhostPingCache.Contains(msg.Value.Id))
-            {
-                return Task.CompletedTask;
-            }
-            if (msg.Value.MentionedUserIds.Count > 0)
-            {
-                if (msg.Value.MentionedUserIds.Count == 1 && (msg.Value.MentionedUserIds.First() == msg.Value.Author.Id || msg.Value.MentionedUserIds.Contains(GetBot().GetClient().CurrentUser.Id)))
-                {
-                    return Task.CompletedTask;
-                }
-                //has ghost pings
-                string message = "";
-                foreach (ulong id in msg.Value.MentionedUserIds)
-                {
-                    if (id == GetBot().GetClient().CurrentUser.Id)
-                    {
-                        continue;
-                    }
-                    message += ("<@" + id.ToString() + ">");
-                    message += " ";
-                }
-                Log.WriteDebug("Mentioned: " + msg.Value.MentionedUserIds.Count);
-                EmbedBuilder eb = new();
-                eb.WithTitle("uh oh, you're getting ghost pinged!");
-                eb.WithCurrentTimestamp();
-                eb.AddField("Content", msg.Value.Content);
-                eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
-                eb.Color = Color.Blue;
-                channel.Value.SendMessageAsync(message, embed: eb.Build());
-            }
-            return Task.CompletedTask;
-        }
-        public Task OnMessageDeleted(Cacheable<IMessage, ulong> msg, Cacheable<IMessageChannel, ulong> channel)
-        {
-            if (msg.Value == null)
-            {
-                Log.WriteWarning("OnMessageDeleted msg is null!");
-                return Task.CompletedTask;
-            }
-            if (msg.Value.Author.Id == GetBot().GetClient().CurrentUser.Id)
-            {
-                return Task.CompletedTask;
-            }
-            var channel1 = GetBot().GetClient().GetChannel(GetBot().GetConfig().DeletedMessagesChannelID) as ITextChannel;
-            if (channel1 == null)
-            {
-                Log.WriteFatal("Channel not found! " + GetBot().GetConfig().DeletedMessagesChannelID);
-                return Task.CompletedTask;
-            }
-
-            EmbedBuilder eb = new();
-            eb.WithTitle("Deleted Message");
-            eb.AddField("Author", "<@" + msg.Value.Author.Id + ">");
-            eb.AddField("Channel", "<#" + channel.Id + ">");
-            if (msg.Value.Content != null || !string.IsNullOrEmpty(msg.Value.Content))
-            {
-                if(msg.Value.Content.Length > 0)
-                {
-                    eb.AddField("Content (text)", msg.Value.Content);
-                }
-            }
-            if (msg.Value.Attachments.Count > 0)
-            {
-                string atturls = "";
-                foreach (var att in msg.Value.Attachments)
-                {
-                    string attachmentparsed = att.Url.Replace("media", "cdn").Replace("net", "com");
-                    Log.WriteDebug(attachmentparsed);
-                    Log.WriteDebug(att.Url);
-                    if(att == msg.Value.Attachments.Last())
-                    {
-                        atturls += attachmentparsed;
-                    }
-                    else
-                    {
-                        atturls += attachmentparsed + "\n";
-                    }
-                }
-                eb.AddField("Attachments", atturls);
-                Embed[] embeds = { eb.Build() };
-                channel1.SendMessageAsync(embeds: embeds);
-            }
-            else
-            {
-                channel1.SendMessageAsync(embed: eb.Build());
             }
             return Task.CompletedTask;
         }
@@ -600,6 +465,7 @@ namespace LurkbotV5
         {
             return LevelRoles.RoleLevels.ContainsKey(value);
         }
+
         public static DiscordUserConfig GetUserConfig(ulong UserID)
         {
             string userpath = UserConfigPath + UserID.ToString() + ".json";
@@ -621,7 +487,8 @@ namespace LurkbotV5
                 return config;
             }
         }
-        public static void SetUserConfig(DiscordUserConfig config)
+
+        public static void WriteUserConfig(DiscordUserConfig config)
         {
             ulong id = config.UserID;
             if (UserCache.ContainsKey(id))
@@ -632,6 +499,7 @@ namespace LurkbotV5
             string userpath = UserConfigPath + config.UserID.ToString() + ".json";
             File.WriteAllText(userpath, JsonConvert.SerializeObject(config));
         }
+
         public static void DeleteUserConfig(ulong id, ulong guildid)
         {
             if (guildid == Bot.Instance.GetConfig().GuildID)
@@ -770,14 +638,28 @@ namespace LurkbotV5
         public uint XPLevel;
         public float XP;
         public bool LockXP;
+        public UserWarnings UserWarnings;
+
         public DiscordUserConfig(ulong UserID, uint XPLevel = 0, float XP = 0f, bool LockXP = false)
         {
             this.UserID = UserID;
             this.XPLevel = XPLevel;
             this.XP = XP;
             this.LockXP = LockXP;
+            this.UserWarnings = new();
+        }
+
+        public DiscordUserConfig(ulong UserID, UserWarnings userWarnings, uint XPLevel = 0, float XP = 0f, bool LockXP = false)
+        {
+            this.UserID = UserID;
+            this.XPLevel = XPLevel;
+            this.XP = XP;
+            this.LockXP = LockXP;
+            this.UserWarnings = userWarnings;
+
         }
     }
+
     public struct DiscordConfig
     {
         public bool XPEnabled;
@@ -805,6 +687,69 @@ namespace LurkbotV5
             this.XPRequirementStrictness = XPRequirementStrictness;
         }
     }
+
+    public struct UserWarnings
+    {
+        public uint TotalWarnings { get; private set; }
+        public List<UserWarning> Warnings { get; private set; }
+
+        public UserWarnings()
+        {
+            TotalWarnings = 0;
+            Warnings = new();
+        }
+
+        public void AddWarning(UserWarning warning)
+        {
+            if (Warnings.Contains(warning))
+            {
+                Log.WriteWarning("Duplicate warning!");
+                return;
+            }
+            else
+            {
+                Warnings.Add(warning);
+                TotalWarnings = (uint)Warnings.Count;
+            }
+        }
+
+        public bool RemoveWarning(int id)
+        {
+            if(Warnings.Count < id)
+            {
+                Log.WriteWarning("Out of range!");
+                return false;
+            }
+            Warnings.RemoveAt(id);
+            return true;
+        }
+
+        public bool RemoveWarning(UserWarning warning)
+        {
+            if (!Warnings.Contains(warning))
+            {
+                Log.WriteWarning("Failure to remove warning. Not Found.");
+                return false;
+            }
+            Warnings.Remove(warning);
+            return true;
+        }
+    }
+
+    public struct UserWarning
+    {
+        public string Sender;
+        public ulong SenderID;
+        public string Reason;
+
+        public UserWarning(string sender, ulong senderId, string reason)
+        {
+            this.Sender = sender;
+            this.SenderID = senderId;
+            this.Reason = reason;
+        }
+    }
+
     #endregion
 
     #region Level Roles

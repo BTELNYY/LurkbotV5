@@ -33,7 +33,7 @@ namespace LurkbotV5.SlashCommands
                 id = user.Id;
             }
             DiscordUserConfig cfg = DiscordManager.GetUserConfig(id);
-            DiscordManager.SetUserConfig(cfg);
+            DiscordManager.WriteUserConfig(cfg);
             EmbedBuilder eb = new();
             eb.WithTitle(TranslationManager.GetTranslations().LevelPhrases.RankData + user.Username);
             eb.AddField(TranslationManager.GetTranslations().LevelPhrases.LevelName, cfg.XPLevel);
