@@ -59,6 +59,9 @@ namespace LurkbotV5.SlashCommands
                 OptionType = ApplicationCommandOptionType.Integer,
                 Required = true
             };
+            Options.Clear();
+            Options.Add(cob);
+            Options.Add(cob1);
         }
     }
 }
