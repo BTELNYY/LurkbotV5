@@ -48,13 +48,14 @@ namespace LurkbotV5.Managers
             }
             else
             {
+                Log.WriteWarning("File doesn't exist, creating new.");
                 SaveData();
             }
         }
         private static void SaveData()
         {
             string data = string.Join("\n", ExcludedNames);
-            
+            Directory.CreateDirectory(DiscordManager.ServerConfigPath);
             if (File.Exists(DiscordManager.ServerConfigPath + filename))
             {
                 File.Delete(DiscordManager.ServerConfigPath + filename);
@@ -62,6 +63,7 @@ namespace LurkbotV5.Managers
             }
             else
             {
+                Log.WriteInfo("Creating file as it doesn't exist.");
                 File.WriteAllText(DiscordManager.ServerConfigPath + filename, data);
             }
         }
