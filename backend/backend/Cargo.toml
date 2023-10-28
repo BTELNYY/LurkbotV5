@@ -9,7 +9,7 @@ edition = "2021"
 rocket = { version = "0.5.0-rc.3", features = ["json"] }
 anyhow = "1.0.70"
 clap = { version = "4.1.11", features = ["env", "derive"] }
-reqwest = { version = "0.11.14", features = ["json"] }
+reqwest = { version = "0.11.14", default-features = false, features = ["json", "rustls-tls-webpki-roots"] }
 serde = { version = "1.0.157", features = ["derive"] }
 serde_json = "1.0.94"
 parking_lot = "0.12.1"

@@ -1,5 +1,6 @@
 [workspace]
 members = ["backend", "migrate", "lurky", "BCF"]
+resolver = "2"
 
 [profile.dev.package."*"]
 # Set the default for dependencies in Development mode.
