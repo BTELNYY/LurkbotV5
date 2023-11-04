@@ -23,6 +23,7 @@ services:
       - ./statistics:/app/statistics/
       - ./translations:/app/translations/
       - ./logs:/app/logs/
+      - ./data:/app/data/
     environment:
       - RUNNING_IN_DOCKER=true
     links:
